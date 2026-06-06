@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(python -c \"import fastapi, uvicorn, jinja2, sqlalchemy, aiofiles; print\\('all imports OK'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(uvicorn main:app --port 8123)",
+      "Bash(curl -s http://localhost:8123/health)",
+      "Bash(curl -s http://localhost:8123/)",
+      "Bash(curl -s -X POST http://localhost:8123/api/v1/register/identity -F 'full_name=Jan de Vries' -F email=jan@test.nl -F date_of_birth=1990-05-15 -F id_type=bsn -F id_number=123456789)",
+      "Bash(curl -s -X POST http://localhost:8123/api/v1/register/connect-bank -F tenant_id=1)",
+      "Bash(curl -s -X POST http://localhost:8123/api/v1/register/income -F tenant_id=1 -F application_id=1 -F employment_status=employed -F amount_requested=2500)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)"
+    ]
+  }
+}

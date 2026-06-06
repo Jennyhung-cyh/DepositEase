@@ -1,0 +1,463 @@
+/* ─── Design tokens ─── */
+:root {
+  --navy:     #1A3C5E;
+  --navy-lt:  #2A5082;
+  --orange:   #FF6B00;
+  --orange-lt:#FF8C33;
+  --bg:       #F4F7FB;
+  --white:    #FFFFFF;
+  --text:     #1A1A2E;
+  --muted:    #6B7280;
+  --border:   #D1D9E0;
+  --success:  #2E7D32;
+  --error:    #C62828;
+  --radius:   12px;
+  --shadow:   0 4px 24px rgba(26,60,94,.10);
+  --step-sz:  32px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Top bar ─── */
+.topbar {
+  background: var(--navy);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar .logo-mark {
+  width: 36px; height: 36px;
+  background: var(--orange);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 18px; color: #fff;
+}
+
+.topbar .logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.topbar .logo-text span { color: var(--orange); }
+
+/* ─── Hero strip ─── */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+  color: #fff;
+  padding: 40px 32px 56px;
+  text-align: center;
+}
+
+.hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+.hero p  { font-size: 15px; color: rgba(255,255,255,.75); max-width: 460px; margin: 0 auto; }
+
+/* ─── Step progress ─── */
+.progress-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 28px 16px 0;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  max-width: 160px;
+}
+
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--step-sz) / 2);
+  left: calc(50% + var(--step-sz) / 2);
+  width: calc(100% - var(--step-sz));
+  height: 2px;
+  background: var(--border);
+  transition: background .3s;
+}
+
+.step-item.done::after  { background: var(--orange); }
+.step-item.active::after { background: var(--border); }
+
+.step-circle {
+  width: var(--step-sz); height: var(--step-sz);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  border: 2px solid var(--border);
+  background: var(--white);
+  color: var(--muted);
+  transition: all .3s;
+  z-index: 1;
+}
+
+.step-item.done   .step-circle { background: var(--orange); border-color: var(--orange); color: #fff; }
+.step-item.active .step-circle { background: var(--navy);   border-color: var(--navy);   color: #fff; }
+
+.step-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 6px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.step-item.active .step-label { color: var(--navy); }
+.step-item.done   .step-label { color: var(--orange); }
+
+/* ─── Card ─── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 40px;
+  max-width: 560px;
+  width: 100%;
+  margin: 32px auto 48px;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* ─── Form elements ─── */
+.form-group { margin-bottom: 20px; }
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--white);
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+  appearance: none;
+}
+
+input:focus, select:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(26,60,94,.12);
+}
+
+input.error { border-color: var(--error); }
+.field-error { font-size: 12px; color: var(--error); margin-top: 4px; display: none; }
+.field-error.visible { display: block; }
+
+/* ─── Segmented control (ID type) ─── */
+.seg-control {
+  display: flex;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.seg-control input[type="radio"] { display: none; }
+
+.seg-control label {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  margin: 0;
+  transition: background .2s, color .2s;
+  border-right: 1.5px solid var(--border);
+}
+
+.seg-control label:last-of-type { border-right: none; }
+
+.seg-control input[type="radio"]:checked + label {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* ─── Upload zone ─── */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  position: relative;
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--navy);
+  background: rgba(26,60,94,.04);
+}
+
+.upload-zone.has-file {
+  border-color: var(--success);
+  background: rgba(46,125,50,.04);
+}
+
+.upload-zone input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+
+.upload-icon { font-size: 32px; margin-bottom: 8px; }
+
+.upload-text {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.upload-text strong { color: var(--navy); }
+
+.upload-preview {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.upload-preview.visible { display: flex; }
+
+/* ─── Toggle tabs (bank vs payslip) ─── */
+.income-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.toggle-card {
+  flex: 1;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s;
+  position: relative;
+}
+
+.toggle-card input[type="radio"] {
+  position: absolute; opacity: 0; pointer-events: none;
+}
+
+.toggle-card.selected {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(26,60,94,.10);
+}
+
+.toggle-card .tc-icon  { font-size: 26px; margin-bottom: 6px; }
+.toggle-card .tc-title { font-size: 14px; font-weight: 700; color: var(--navy); }
+.toggle-card .tc-desc  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* ─── Bank connect button ─── */
+.bank-connect-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  width: 100%;
+  transition: background .2s;
+}
+
+.bank-connect-btn:hover { background: var(--navy-lt); }
+.bank-connect-btn .bank-logo { font-size: 22px; }
+.bank-connect-btn.connected { background: var(--success); cursor: default; }
+
+/* ─── Employment status chips ─── */
+.chip-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip-group input[type="radio"] { display: none; }
+
+.chip-group label {
+  padding: 10px 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  margin: 0;
+  transition: all .2s;
+}
+
+.chip-group input[type="radio"]:checked + label {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+/* ─── Deposit amount ─── */
+.amount-group {
+  position: relative;
+}
+
+.amount-group .currency {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  pointer-events: none;
+}
+
+.amount-group input { padding-left: 32px; font-size: 20px; font-weight: 700; }
+
+.amount-hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+/* ─── Divider ─── */
+.divider {
+  border: none;
+  border-top: 1.5px solid var(--border);
+  margin: 24px 0;
+}
+
+/* ─── Buttons ─── */
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btn {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--orange);
+  color: #fff;
+}
+
+.btn-primary:hover { background: var(--orange-lt); }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+.btn-secondary {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+}
+
+.btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ─── Toast / spinner ─── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text); color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+  opacity: 0; pointer-events: none;
+  transform: translateY(12px);
+  transition: all .3s;
+  z-index: 999;
+}
+
+.toast.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.toast.success { background: var(--success); }
+.toast.error   { background: var(--error); }
+
+.spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+.btn.loading .spinner { display: block; }
+.btn.loading .btn-label { display: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Hidden utility ─── */
+.hidden { display: none !important; }
+
+/* ─── Liveness badge ─── */
+.liveness-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(26,60,94,.06);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.liveness-note .icon { font-size: 16px; flex-shrink: 0; }
+
+/* ─── Responsive ─── */
+@media (max-width: 600px) {
+  .card { margin: 20px 16px 40px; padding: 28px 20px; }
+  .hero { padding: 28px 16px 44px; }
+  .hero h1 { font-size: 22px; }
+  .income-toggle { flex-direction: column; }
+}

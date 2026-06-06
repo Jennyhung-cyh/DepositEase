@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply — DepositEase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="topbar">
+  <div class="logo-mark">D</div>
+  <div class="logo-text">Deposit<span>Ease</span></div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <h1>Apply for your rental deposit</h1>
+  <p>Get up to €4,000 — instant AI credit decision, no guarantor needed.</p>
+</section>
+
+<!-- Step progress -->
+<nav class="progress-wrap" id="stepProgress" aria-label="Application steps">
+  <div class="step-item active" id="prog-1">
+    <div class="step-circle">1</div>
+    <div class="step-label">Identity</div>
+  </div>
+  <div class="step-item" id="prog-2">
+    <div class="step-circle">2</div>
+    <div class="step-label">Income</div>
+  </div>
+  <div class="step-item" id="prog-3">
+    <div class="step-circle">3</div>
+    <div class="step-label">Decision</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     STEP 1 — Identity Verification
+═══════════════════════════════════════════ -->
+<main>
+<section id="step1" class="card">
+  <h2 class="card-title">Identity verification</h2>
+  <p class="card-subtitle">Verify who you are — takes about 2 minutes.</p>
+
+  <form id="form-identity" novalidate>
+
+    <!-- ID type -->
+    <div class="form-group">
+      <label>ID type</label>
+      <div class="seg-control">
+        <input type="radio" name="id_type" id="id-bsn" value="bsn" checked />
+        <label for="id-bsn">BSN (Dutch)</label>
+        <input type="radio" name="id_type" id="id-passport" value="passport" />
+        <label for="id-passport">Passport</label>
+      </div>
+    </div>
+
+    <!-- BSN field -->
+    <div class="form-group" id="bsn-group">
+      <label for="bsn">BSN (Burgerservicenummer)</label>
+      <input type="text" id="bsn" name="id_number"
+             placeholder="123456789" maxlength="9" inputmode="numeric" />
+      <div class="field-error" id="err-bsn">Enter a valid 9-digit BSN.</div>
+    </div>
+
+    <!-- Passport field (hidden by default) -->
+    <div class="form-group hidden" id="passport-group">
+      <label for="passport">Passport number</label>
+      <input type="text" id="passport" name="id_number_alt"
+             placeholder="AA1234567" maxlength="20" />
+      <div class="field-error" id="err-passport">Enter a valid passport number.</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Full name -->
+    <div class="form-group">
+      <label for="full_name">Full name <span style="color:var(--orange)">*</span></label>
+      <input type="text" id="full_name" name="full_name"
+             placeholder="Jan de Vries" autocomplete="name" />
+      <div class="field-error" id="err-name">Please enter your full name.</div>
+    </div>
+
+    <!-- Date of birth -->
+    <div class="form-group">
+      <label for="date_of_birth">Date of birth <span style="color:var(--orange)">*</span></label>
+      <input type="date" id="date_of_birth" name="date_of_birth"
+             max="" autocomplete="bday" />
+      <div class="field-error" id="err-dob">Please enter a valid date of birth.</div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email address <span style="color:var(--orange)">*</span></label>
+      <input type="email" id="email" name="email"
+             placeholder="jan@example.nl" autocomplete="email" />
+      <div class="field-error" id="err-email">Please enter a valid email address.</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Upload ID document -->
+    <div class="form-group">
+      <label>Upload ID document</label>
+      <div class="upload-zone" id="zone-id" role="button" aria-label="Upload ID document">
+        <input type="file" id="file-id" accept="image/*,.pdf" aria-label="ID document file" />
+        <div class="upload-icon">🪪</div>
+        <div class="upload-text">
+          <strong>Drag & drop</strong> or click to upload<br />
+          Passport scan, ID card, or residence permit (JPG/PNG/PDF)
+        </div>
+        <div class="upload-preview" id="prev-id">
+          <span>✅</span> <span id="prev-id-name"></span>
+        </div>
+      </div>
+      <div class="field-error" id="err-id-doc">Please upload your ID document.</div>
+    </div>
+
+    <!-- Selfie / liveness -->
+    <div class="form-group">
+      <label>Selfie / liveness check</label>
+      <div class="upload-zone" id="zone-selfie" role="button" aria-label="Upload selfie">
+        <input type="file" id="file-selfie" accept="image/*" capture="user" aria-label="Selfie file" />
+        <div class="upload-icon">🤳</div>
+        <div class="upload-text">
+          <strong>Take a selfie</strong> or upload a photo<br />
+          Must clearly show your face — no sunglasses or hats
+        </div>
+        <div class="upload-preview" id="prev-selfie">
+          <span>✅</span> <span id="prev-selfie-name"></span>
+        </div>
+      </div>
+      <div class="field-error" id="err-selfie">Please upload a selfie photo.</div>
+      <div class="liveness-note">
+        <span class="icon">🔒</span>
+        <span>Your photos are used for KYC only and never shared with third parties.
+        Stored in compliance with GDPR Article 9.</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button type="submit" class="btn btn-primary" id="btn-identity">
+        <span class="btn-label">Continue ↗</span>
+        <span class="spinner"></span>
+      </button>
+    </div>
+
+  </form>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     STEP 2 — Income Proof
+═══════════════════════════════════════════ -->
+<section id="step2" class="card hidden">
+  <h2 class="card-title">Income proof</h2>
+  <p class="card-subtitle">Help us verify your ability to repay the deposit loan.</p>
+
+  <form id="form-income" novalidate>
+
+    <!-- Toggle: bank vs payslip -->
+    <div class="form-group">
+      <label>How would you like to verify your income?</label>
+      <div class="income-toggle">
+        <div class="toggle-card selected" id="tc-bank" onclick="selectIncomeMethod('bank')">
+          <input type="radio" name="income_method" value="bank" checked />
+          <div class="tc-icon">🏦</div>
+          <div class="tc-title">Connect bank account</div>
+          <div class="tc-desc">Instant — 6 months of transactions via PSD2</div>
+        </div>
+        <div class="toggle-card" id="tc-payslip" onclick="selectIncomeMethod('payslip')">
+          <input type="radio" name="income_method" value="payslip" />
+          <div class="tc-icon">📄</div>
+          <div class="tc-title">Upload payslip</div>
+          <div class="tc-desc">Upload last 3 months of payslips</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bank connect panel -->
+    <div id="panel-bank">
+      <button type="button" class="bank-connect-btn" id="btn-connect-bank">
+        <span class="bank-logo">🏦</span>
+        <span id="bank-btn-label">Connect ING / ABN AMRO / Rabobank (simulated)</span>
+        <span class="spinner"></span>
+      </button>
+      <p style="font-size:12px; color:var(--muted); margin-top:8px; text-align:center;">
+        Secure connection · No login credentials shared · Simulated for MVP
+      </p>
+    </div>
+
+    <!-- Payslip upload panel -->
+    <div id="panel-payslip" class="hidden">
+      <div class="upload-zone" id="zone-payslip" role="button" aria-label="Upload payslip">
+        <input type="file" id="file-payslip" accept="image/*,.pdf" aria-label="Payslip file" />
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">
+          <strong>Drag & drop</strong> or click to upload<br />
+          PDF or image of your last 3 payslips
+        </div>
+        <div class="upload-preview" id="prev-payslip">
+          <span>✅</span> <span id="prev-payslip-name"></span>
+        </div>
+      </div>
+      <div class="field-error" id="err-payslip">Please upload a payslip.</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Employment status -->
+    <div class="form-group">
+      <label>Employment status <span style="color:var(--orange)">*</span></label>
+      <div class="chip-group">
+        <input type="radio" name="employment_status" id="es-student"  value="student" />
+        <label for="es-student">Student</label>
+        <input type="radio" name="employment_status" id="es-employed" value="employed" />
+        <label for="es-employed">Employed</label>
+        <input type="radio" name="employment_status" id="es-expat"    value="expat" />
+        <label for="es-expat">Expat</label>
+      </div>
+      <div class="field-error" id="err-employment">Please select your employment status.</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Deposit amount -->
+    <div class="form-group">
+      <label for="amount_requested">Deposit amount needed <span style="color:var(--orange)">*</span></label>
+      <div class="amount-group">
+        <span class="currency">€</span>
+        <input type="number" id="amount_requested" name="amount_requested"
+               min="1000" max="4000" step="100" placeholder="2000" />
+      </div>
+      <div class="amount-hint">Between €1,000 and €4,000 · Repaid in 12–24 monthly instalments</div>
+      <div class="field-error" id="err-amount">Please enter a valid amount (€1,000–€4,000).</div>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+      <button type="submit" class="btn btn-primary" id="btn-income">
+        <span class="btn-label">Submit application ↗</span>
+        <span class="spinner"></span>
+      </button>
+    </div>
+
+  </form>
+</section>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<script src="/static/js/register.js"></script>
+</body>
+</html>

@@ -149,81 +149,187 @@
 
   <form id="form-income" novalidate>
 
-    <!-- Toggle: bank vs payslip -->
+    <!-- Employment status -->
     <div class="form-group">
-      <label>How would you like to verify your income?</label>
-      <div class="income-toggle">
-        <div class="toggle-card selected" id="tc-bank" onclick="selectIncomeMethod('bank')">
-          <input type="radio" name="income_method" value="bank" checked />
-          <div class="tc-icon">🏦</div>
-          <div class="tc-title">Connect bank account</div>
-          <div class="tc-desc">Instant — 6 months of transactions via PSD2</div>
+      <label>What is your current employment status? <span style="color:var(--orange)">*</span></label>
+      <div class="option-list">
+        <input type="radio" name="employment_status" id="emp-full-time" value="employed_full_time" />
+        <label for="emp-full-time">Employed full-time</label>
+        <input type="radio" name="employment_status" id="emp-part-time" value="employed_part_time" />
+        <label for="emp-part-time">Employed part-time</label>
+        <input type="radio" name="employment_status" id="emp-self-employed" value="self_employed" />
+        <label for="emp-self-employed">Self-employed / freelance</label>
+        <input type="radio" name="employment_status" id="emp-student" value="student" />
+        <label for="emp-student">Student</label>
+        <input type="radio" name="employment_status" id="emp-unemployed" value="unemployed" />
+        <label for="emp-unemployed">Unemployed / between jobs</label>
+      </div>
+      <div class="field-error" id="err-employment">Please select your employment status.</div>
+
+      <!-- Conditional: contract type (employed full/part-time) -->
+      <div class="conditional-block hidden" id="cond-contract-type">
+        <label>Contract type <span style="color:var(--orange)">*</span></label>
+        <div class="option-list">
+          <input type="radio" name="contract_type" id="ct-permanent" value="permanent" />
+          <label for="ct-permanent">Permanent contract</label>
+          <input type="radio" name="contract_type" id="ct-fixed-term" value="fixed_term" />
+          <label for="ct-fixed-term">Fixed-term contract</label>
+          <input type="radio" name="contract_type" id="ct-zero-hours" value="zero_hours" />
+          <label for="ct-zero-hours">Zero-hours contract</label>
         </div>
-        <div class="toggle-card" id="tc-payslip" onclick="selectIncomeMethod('payslip')">
-          <input type="radio" name="income_method" value="payslip" />
-          <div class="tc-icon">📄</div>
-          <div class="tc-title">Upload payslip</div>
-          <div class="tc-desc">Upload last 3 months of payslips</div>
+        <div class="field-error" id="err-contract-type">Please select your contract type.</div>
+      </div>
+
+      <!-- Conditional: self-employed duration -->
+      <div class="conditional-block hidden" id="cond-self-employed">
+        <label>How long have you been self-employed? <span style="color:var(--orange)">*</span></label>
+        <div class="option-list">
+          <input type="radio" name="self_employed_duration" id="sed-lt-1" value="lt_1_year" />
+          <label for="sed-lt-1">Less than 1 year</label>
+          <input type="radio" name="self_employed_duration" id="sed-1-2" value="1_2_years" />
+          <label for="sed-1-2">1–2 years</label>
+          <input type="radio" name="self_employed_duration" id="sed-gt-2" value="gt_2_years" />
+          <label for="sed-gt-2">More than 2 years</label>
         </div>
+        <div class="field-error" id="err-self-employed">Please select how long you've been self-employed.</div>
+      </div>
+
+      <!-- Conditional: student questions -->
+      <div class="conditional-block hidden" id="cond-student">
+        <label>Do you receive Dutch student finance (DUO)? <span style="color:var(--orange)">*</span></label>
+        <div class="seg-control">
+          <input type="radio" name="receives_duo" id="duo-yes" value="yes" />
+          <label for="duo-yes">Yes</label>
+          <input type="radio" name="receives_duo" id="duo-no" value="no" />
+          <label for="duo-no">No</label>
+        </div>
+        <div class="field-error" id="err-duo">Please answer this question.</div>
+
+        <label style="margin-top:16px;">Do you have part-time income? <span style="color:var(--orange)">*</span></label>
+        <div class="seg-control">
+          <input type="radio" name="has_parttime_income" id="pti-yes" value="yes" />
+          <label for="pti-yes">Yes</label>
+          <input type="radio" name="has_parttime_income" id="pti-no" value="no" />
+          <label for="pti-no">No</label>
+        </div>
+        <div class="field-error" id="err-parttime">Please answer this question.</div>
+      </div>
+
+      <!-- Conditional: unemployed notice -->
+      <div class="callout callout-warning hidden" id="cond-unemployed">
+        <span class="icon">⚠️</span>
+        <span>Without a regular income source, your application may require additional review.</span>
       </div>
     </div>
 
-    <!-- Bank connect panel -->
-    <div id="panel-bank">
+    <hr class="divider" />
+
+    <!-- Residency status -->
+    <div class="form-group">
+      <label>What is your residency status in the Netherlands? <span style="color:var(--orange)">*</span></label>
+      <div class="option-list">
+        <input type="radio" name="residency_status" id="res-dutch" value="dutch_national" />
+        <label for="res-dutch">Dutch national</label>
+        <input type="radio" name="residency_status" id="res-eu" value="eu_citizen" />
+        <label for="res-eu">EU citizen residing in NL</label>
+        <input type="radio" name="residency_status" id="res-non-eu" value="non_eu_permit" />
+        <label for="res-non-eu">Non-EU — work or study permit</label>
+        <input type="radio" name="residency_status" id="res-recent" value="recently_arrived" />
+        <label for="res-recent">Recently arrived (less than 6 months)</label>
+      </div>
+      <div class="field-error" id="err-residency">Please select your residency status.</div>
+
+      <!-- Conditional: non-EU permit details -->
+      <div class="conditional-block hidden" id="cond-permit">
+        <label>Type of permit <span style="color:var(--orange)">*</span></label>
+        <div class="option-list">
+          <input type="radio" name="permit_type" id="pt-work" value="work_permit" />
+          <label for="pt-work">Work permit (kennismigrant)</label>
+          <input type="radio" name="permit_type" id="pt-study" value="study_permit" />
+          <label for="pt-study">Study permit</label>
+          <input type="radio" name="permit_type" id="pt-other" value="other" />
+          <label for="pt-other">Other</label>
+        </div>
+        <div class="field-error" id="err-permit-type">Please select your permit type.</div>
+
+        <label for="permit_expiry" style="margin-top:16px;">Permit expiry date <span style="color:var(--orange)">*</span></label>
+        <input type="date" id="permit_expiry" name="permit_expiry_date" />
+        <div class="field-error" id="err-permit-expiry">Please enter your permit's expiry date.</div>
+
+        <div class="callout callout-info">
+          <span class="icon">💡</span>
+          <span>Permit duration may affect your repayment term options.</span>
+        </div>
+      </div>
+
+      <!-- Conditional: recently arrived notice -->
+      <div class="callout callout-warning hidden" id="cond-recent">
+        <span class="icon">⚠️</span>
+        <span>As you have limited local credit history, bank connection is especially important for your application.</span>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Bank connection (required) -->
+    <div class="verify-section">
+      <div class="verify-section-header">
+        <span class="badge badge-required">Required</span>
+        <span class="vs-icon">🏦</span>
+        <span class="vs-title">Connect your bank account</span>
+      </div>
+      <p class="vs-desc">Pulls 6 months of transactions via PSD2. Used to assess spending,
+        savings, and existing debt obligations.</p>
+
       <button type="button" class="bank-connect-btn" id="btn-connect-bank">
         <span class="bank-logo">🏦</span>
         <span id="bank-btn-label">Connect ING / ABN AMRO / Rabobank (simulated)</span>
         <span class="spinner"></span>
       </button>
+      <div class="bank-status" id="bank-status">
+        <span id="bank-status-label">Status: ⬜ Not connected</span>
+      </div>
       <p style="font-size:12px; color:var(--muted); margin-top:8px; text-align:center;">
         Secure connection · No login credentials shared · Simulated for MVP
       </p>
-    </div>
-
-    <!-- Payslip upload panel -->
-    <div id="panel-payslip" class="hidden">
-      <div class="upload-zone" id="zone-payslip" role="button" aria-label="Upload payslip">
-        <input type="file" id="file-payslip" accept="image/*,.pdf" aria-label="Payslip file" />
-        <div class="upload-icon">📄</div>
-        <div class="upload-text">
-          <strong>Drag & drop</strong> or click to upload<br />
-          PDF or image of your last 3 payslips
-        </div>
-        <div class="upload-preview" id="prev-payslip">
-          <span>✅</span> <span id="prev-payslip-name"></span>
-        </div>
-      </div>
-      <div class="field-error" id="err-payslip">Please upload a payslip.</div>
+      <div class="field-error" id="err-bank">Please connect your bank account to continue.</div>
     </div>
 
     <hr class="divider" />
 
-    <!-- Employment status -->
-    <div class="form-group">
-      <label>Employment status <span style="color:var(--orange)">*</span></label>
-      <div class="chip-group">
-        <input type="radio" name="employment_status" id="es-student"  value="student" />
-        <label for="es-student">Student</label>
-        <input type="radio" name="employment_status" id="es-employed" value="employed" />
-        <label for="es-employed">Employed</label>
-        <input type="radio" name="employment_status" id="es-expat"    value="expat" />
-        <label for="es-expat">Expat</label>
+    <!-- Income document upload (recommended, document type depends on employment situation) -->
+    <div class="verify-section">
+      <div class="verify-section-header">
+        <span class="badge badge-recommended">Recommended</span>
+        <span class="vs-icon">📄</span>
+        <span class="vs-title">Upload income document</span>
       </div>
-      <div class="field-error" id="err-employment">Please select your employment status.</div>
-    </div>
+      <p class="vs-desc">Adding this improves your credit profile and may result in a better interest rate.</p>
 
-    <hr class="divider" />
+      <p class="vs-empty" id="income-doc-prompt">Select your employment status above to see which document to upload.</p>
 
-    <!-- Deposit amount -->
-    <div class="form-group">
-      <label for="amount_requested">Deposit amount needed <span style="color:var(--orange)">*</span></label>
-      <div class="amount-group">
-        <span class="currency">€</span>
-        <input type="number" id="amount_requested" name="amount_requested"
-               min="1000" max="4000" step="100" placeholder="2000" />
+      <div id="income-doc-panel" class="hidden">
+        <label id="income-doc-label">Upload document</label>
+        <div class="upload-zone" id="zone-income-doc" role="button" aria-label="Upload income document">
+          <input type="file" id="file-income-doc" accept="image/*,.pdf" aria-label="Income document file" />
+          <div class="upload-icon">📄</div>
+          <div class="upload-text">
+            <strong>Drag & drop</strong> or click to upload<br />
+            <span id="income-doc-hint"></span>
+          </div>
+          <div class="upload-preview" id="prev-income-doc">
+            <span>✅</span> <span id="prev-income-doc-name"></span>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <span class="icon">💡</span>
+          <span id="income-doc-tip"></span>
+        </div>
       </div>
-      <div class="amount-hint">Between €1,000 and €4,000 · Repaid in 12–24 monthly instalments</div>
-      <div class="field-error" id="err-amount">Please enter a valid amount (€1,000–€4,000).</div>
+
+      <div id="income-doc-none" class="hidden">
+        <p class="vs-empty">Not applicable for your situation — no income document needed.</p>
+      </div>
     </div>
 
     <div class="btn-row">

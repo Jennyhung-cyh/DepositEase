@@ -17,7 +17,31 @@
       "Bash(gh auth *)",
       "Bash(uvicorn main:app --port 8124)",
       "Bash(curl -s http://localhost:8124/ -o /tmp/page.html)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(sqlite3 depositease.db \".tables\")",
+      "Bash(sqlite3 depositease.db \"PRAGMA table_info\\(tenants\\);\")",
+      "Bash(sqlite3 depositease.db \"SELECT count\\(*\\) FROM tenants;\" \"SELECT count\\(*\\) FROM applications;\")",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(python3 -c \"import fastapi, uvicorn, sqlalchemy\")",
+      "Bash(python3 -m venv .venv)",
+      "Bash(.venv/bin/pip install *)",
+      "Bash(chromium-cli --help)",
+      "Bash(.venv/bin/python -c \"import playwright\")",
+      "Bash(python3 -c \"import playwright\")",
+      "Bash(pip3 show *)",
+      "Bash(.venv/bin/playwright install *)",
+      "Bash(.venv/bin/python /tmp/drive_register.py)",
+      "Bash(.venv/bin/python /tmp/drive_register2.py)",
+      "Bash(python3 -)",
+      "Bash(sqlite3 depositease.db \"SELECT id, full_name, employment_status, contract_type, self_employed_duration, receives_duo, has_parttime_income, residency_status, permit_type, permit_expiry_date, bank_connected FROM tenants;\")",
+      "Bash(sqlite3 depositease.db \"SELECT tenant_id, doc_type, original_filename FROM documents;\")",
+      "Bash(.venv/bin/python /tmp/drive_register3.py)",
+      "Bash(git rev-list *)",
+      "Bash(git cat-file *)",
+      "Bash(sort -k3 -n -r)",
+      "Bash(du -sh .venv)",
+      "Bash(git check-ignore *)"
     ]
   }
 }

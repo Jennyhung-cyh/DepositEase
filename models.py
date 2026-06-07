@@ -11,9 +11,11 @@ from database import Base
 
 
 class EmploymentStatus(str, enum.Enum):
+    employed_full_time = "employed_full_time"
+    employed_part_time = "employed_part_time"
+    self_employed = "self_employed"
     student = "student"
-    employed = "employed"
-    expat = "expat"
+    unemployed = "unemployed"
 
 
 class ApplicationStatus(str, enum.Enum):
@@ -39,6 +41,15 @@ class Tenant(Base):
     passport_number = Column(String(30), nullable=True)
 
     employment_status = Column(String(20), nullable=True)
+    contract_type = Column(String(20), nullable=True)        # "permanent" | "fixed_term" | "zero_hours"
+    self_employed_duration = Column(String(20), nullable=True)  # "lt_1_year" | "1_2_years" | "gt_2_years"
+    receives_duo = Column(Boolean, nullable=True)
+    has_parttime_income = Column(Boolean, nullable=True)
+
+    residency_status = Column(String(20), nullable=True)     # "dutch_national" | "eu_citizen" | "non_eu_permit" | "recently_arrived"
+    permit_type = Column(String(20), nullable=True)          # "work_permit" | "study_permit" | "other"
+    permit_expiry_date = Column(Date, nullable=True)
+
     bank_connected = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -54,7 +65,7 @@ class Document(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
     # GDPR note: uploaded files contain biometric/ID data — store path only,
     # do not embed binary in DB.
-    doc_type = Column(String(30), nullable=False)  # "id_document" | "selfie" | "payslip"
+    doc_type = Column(String(30), nullable=False)  # "id_document" | "selfie" | "payslip" | "tax_return" | "duo_letter"
     original_filename = Column(String(255), nullable=False)
     stored_filename = Column(String(255), nullable=False)
     uploaded_at = Column(DateTime, default=datetime.utcnow)

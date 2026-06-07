@@ -19,6 +19,12 @@ ALLOWED_DOC_TYPES = ALLOWED_IMAGE_TYPES | {"application/pdf"}
 
 router = APIRouter(prefix="/api/v1/register", tags=["registration"])
 
+EMPLOYMENT_STATUSES = ("employed_full_time", "employed_part_time", "self_employed", "student", "unemployed")
+CONTRACT_TYPES = ("permanent", "fixed_term", "zero_hours")
+SELF_EMPLOYED_DURATIONS = ("lt_1_year", "1_2_years", "gt_2_years")
+RESIDENCY_STATUSES = ("dutch_national", "eu_citizen", "non_eu_permit", "recently_arrived")
+PERMIT_TYPES = ("work_permit", "study_permit", "other")
+
 
 def _save_upload(file: UploadFile, subdir: str) -> tuple[str, str]:
     dest_dir = UPLOAD_DIR / subdir
@@ -73,22 +79,26 @@ def submit_identity(
     return {"tenant_id": tenant.id, "application_id": app.id}
 
 
+DOC_TYPES = ("id_document", "selfie", "payslip", "tax_return", "duo_letter")
+DOC_TYPES_ALLOWING_PDF = ("payslip", "tax_return", "duo_letter")
+
+
 @router.post("/upload-document")
 def upload_document(
     tenant_id: int = Form(...),
-    doc_type: str = Form(...),   # "id_document" | "selfie" | "payslip"
+    doc_type: str = Form(...),   # see DOC_TYPES
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    """Upload KYC documents (ID, selfie, payslip). GDPR: files stored server-side only."""
+    """Upload KYC / income documents. GDPR: files stored server-side only."""
     tenant = db.get(Tenant, tenant_id)
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found.")
 
-    if doc_type not in ("id_document", "selfie", "payslip"):
+    if doc_type not in DOC_TYPES:
         raise HTTPException(status_code=422, detail="Invalid doc_type.")
 
-    allowed = ALLOWED_DOC_TYPES if doc_type == "payslip" else ALLOWED_IMAGE_TYPES
+    allowed = ALLOWED_DOC_TYPES if doc_type in DOC_TYPES_ALLOWING_PDF else ALLOWED_IMAGE_TYPES
     if file.content_type not in allowed:
         raise HTTPException(status_code=415, detail=f"Unsupported file type: {file.content_type}")
 
@@ -153,28 +163,72 @@ def connect_bank(
 def submit_income(
     tenant_id: int = Form(...),
     application_id: int = Form(...),
-    employment_status: str = Form(...),   # "student" | "employed" | "expat"
-    amount_requested: float = Form(...),
+    employment_status: str = Form(...),                 # see EMPLOYMENT_STATUSES
+    contract_type: str | None = Form(None),             # required if employed full/part-time
+    self_employed_duration: str | None = Form(None),    # required if self-employed
+    receives_duo: str | None = Form(None),              # "yes" | "no" — required if student
+    has_parttime_income: str | None = Form(None),       # "yes" | "no" — required if student
+    residency_status: str = Form(...),                  # see RESIDENCY_STATUSES
+    permit_type: str | None = Form(None),               # required if non-EU permit
+    permit_expiry_date: str | None = Form(None),        # required if non-EU permit, "YYYY-MM-DD"
     db: Session = Depends(get_db),
 ):
-    """Step 2 — record employment status and requested deposit amount."""
+    """Step 2 — record employment/residency profile.
+    Requested deposit amount is collected on the loan application step (not here)."""
     tenant = db.get(Tenant, tenant_id)
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found.")
 
-    if employment_status not in ("student", "employed", "expat"):
+    if employment_status not in EMPLOYMENT_STATUSES:
         raise HTTPException(status_code=422, detail="Invalid employment_status.")
+    if residency_status not in RESIDENCY_STATUSES:
+        raise HTTPException(status_code=422, detail="Invalid residency_status.")
 
-    if not (1_000 <= amount_requested <= 4_000):
-        raise HTTPException(status_code=422, detail="Deposit amount must be €1,000–€4,000.")
+    # Conditional follow-ups — validate when applicable, discard otherwise so
+    # stale answers from a previously selected branch are never persisted.
+    if employment_status in ("employed_full_time", "employed_part_time"):
+        if contract_type not in CONTRACT_TYPES:
+            raise HTTPException(status_code=422, detail="Please select your contract type.")
+    else:
+        contract_type = None
+
+    if employment_status == "self_employed":
+        if self_employed_duration not in SELF_EMPLOYED_DURATIONS:
+            raise HTTPException(status_code=422, detail="Please select how long you've been self-employed.")
+    else:
+        self_employed_duration = None
+
+    duo_bool = parttime_bool = None
+    if employment_status == "student":
+        if receives_duo not in ("yes", "no") or has_parttime_income not in ("yes", "no"):
+            raise HTTPException(status_code=422, detail="Please answer the student income questions.")
+        duo_bool = receives_duo == "yes"
+        parttime_bool = has_parttime_income == "yes"
+
+    permit_expiry = None
+    if residency_status == "non_eu_permit":
+        if permit_type not in PERMIT_TYPES:
+            raise HTTPException(status_code=422, detail="Please select your permit type.")
+        try:
+            permit_expiry = date.fromisoformat(permit_expiry_date)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail="Enter a valid permit expiry date (YYYY-MM-DD).")
+    else:
+        permit_type = None
 
     tenant.employment_status = employment_status
+    tenant.contract_type = contract_type
+    tenant.self_employed_duration = self_employed_duration
+    tenant.receives_duo = duo_bool
+    tenant.has_parttime_income = parttime_bool
+    tenant.residency_status = residency_status
+    tenant.permit_type = permit_type
+    tenant.permit_expiry_date = permit_expiry
 
     app = db.get(Application, application_id)
     if not app or app.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Application not found.")
 
-    app.amount_requested = amount_requested
     app.status = "pending"
     db.commit()
 

@@ -2,7 +2,31 @@
 let tenantId = null;
 let applicationId = null;
 let bankConnected = false;
-let incomeMethod = 'bank';
+let incomeDocVariant = null;   // 'payslip' | 'tax_return' | 'duo_letter' | null
+
+/* Drives the conditional "Upload income document" panel — which document
+   type applies depends on employment status (and, for students, whether
+   they receive DUO / have part-time income). */
+const INCOME_DOC_CONFIG = {
+  payslip: {
+    docType: 'payslip',
+    label: 'Upload last 3 payslips',
+    hint: 'PDF or image of your last 3 payslips',
+    tip: "<strong>What's in a payslip?</strong><br>Employer · Gross &amp; net salary · Pay period · Tax &amp; pension details",
+  },
+  tax_return: {
+    docType: 'tax_return',
+    label: "Upload last 2 years' tax returns (aangifte)",
+    hint: "PDF or image of your tax returns (aangifte)",
+    tip: 'Accepted: PDF from Belastingdienst portal',
+  },
+  duo_letter: {
+    docType: 'duo_letter',
+    label: 'Upload DUO toekenningsbrief',
+    hint: 'PDF or image of your DUO toekenningsbrief',
+    tip: 'This confirms your monthly student finance amount',
+  },
+};
 
 /* ─── Utilities ─── */
 function toast(msg, type = '') {
@@ -52,6 +76,28 @@ document.querySelectorAll('input[name="id_type"]').forEach(radio => {
   });
 });
 
+/* ─── Employment status conditional follow-ups ─── */
+document.querySelectorAll('input[name="employment_status"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const v = radio.value;
+    document.getElementById('cond-contract-type').classList.toggle('hidden',
+      !(v === 'employed_full_time' || v === 'employed_part_time'));
+    document.getElementById('cond-self-employed').classList.toggle('hidden', v !== 'self_employed');
+    document.getElementById('cond-student').classList.toggle('hidden', v !== 'student');
+    document.getElementById('cond-unemployed').classList.toggle('hidden', v !== 'unemployed');
+    updateIncomeDocPanel();
+  });
+});
+
+/* ─── Residency status conditional follow-ups ─── */
+document.querySelectorAll('input[name="residency_status"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const v = radio.value;
+    document.getElementById('cond-permit').classList.toggle('hidden', v !== 'non_eu_permit');
+    document.getElementById('cond-recent').classList.toggle('hidden', v !== 'recently_arrived');
+  });
+});
+
 /* ─── Upload zones ─── */
 function initUploadZone(zoneId, inputId, previewId, previewNameId) {
   const zone  = document.getElementById(zoneId);
@@ -80,19 +126,87 @@ function initUploadZone(zoneId, inputId, previewId, previewNameId) {
   }
 }
 
-initUploadZone('zone-id',      'file-id',      'prev-id',      'prev-id-name');
-initUploadZone('zone-payslip', 'file-payslip', 'prev-payslip', 'prev-payslip-name');
+/* Clears a file input and its preview — used when the income document
+   type changes (e.g. employment status switches from employed to student). */
+function resetUploadZone(zoneId, inputId, previewId, previewNameId) {
+  const zone  = document.getElementById(zoneId);
+  const input = document.getElementById(inputId);
+  const prev  = document.getElementById(previewId);
+  const name  = document.getElementById(previewNameId);
 
-/* ─── Income method toggle ─── */
-function selectIncomeMethod(method) {
-  incomeMethod = method;
-  document.getElementById('tc-bank').classList.toggle('selected', method === 'bank');
-  document.getElementById('tc-payslip').classList.toggle('selected', method === 'payslip');
-  document.getElementById('panel-bank').classList.toggle('hidden', method !== 'bank');
-  document.getElementById('panel-payslip').classList.toggle('hidden', method === 'bank');
+  zone.classList.remove('has-file');
+  input.value = '';
+  name.textContent = '';
+  prev.classList.remove('visible');
+  zone.querySelector('.upload-icon').style.display = '';
+  zone.querySelector('.upload-text').style.display = '';
 }
 
-/* ─── Bank connect (simulated PSD2) ─── */
+initUploadZone('zone-id',         'file-id',         'prev-id',         'prev-id-name');
+initUploadZone('zone-income-doc', 'file-income-doc', 'prev-income-doc', 'prev-income-doc-name');
+
+/* ─── Income document panel — type depends on employment situation ─── */
+/* Returns a doc-type key when determinable, null when confirmed not
+   applicable (unemployed / no-income student), or undefined when the
+   applicant hasn't answered enough questions yet to tell. */
+function determineIncomeDocVariant() {
+  const emp = document.querySelector('input[name="employment_status"]:checked')?.value;
+  if (!emp) return undefined;
+  if (emp === 'employed_full_time' || emp === 'employed_part_time') return 'payslip';
+  if (emp === 'self_employed') return 'tax_return';
+  if (emp === 'student') {
+    const duo      = document.querySelector('input[name="receives_duo"]:checked')?.value;
+    const parttime = document.querySelector('input[name="has_parttime_income"]:checked')?.value;
+    if (duo === 'yes') return 'duo_letter';
+    if (parttime === 'yes') return 'payslip';
+    if (duo === 'no' && parttime === 'no') return null;   // confirmed no income source
+    return undefined;   // student selected, but DUO/part-time not answered yet
+  }
+  return null;          // unemployed — nothing to upload
+}
+
+function updateIncomeDocPanel() {
+  const variant = determineIncomeDocVariant();
+  const prompt = document.getElementById('income-doc-prompt');
+  const panel  = document.getElementById('income-doc-panel');
+  const none   = document.getElementById('income-doc-none');
+
+  if (variant === undefined) {
+    panel.classList.add('hidden');
+    none.classList.add('hidden');
+    prompt.classList.remove('hidden');
+    incomeDocVariant = null;
+    return;
+  }
+  prompt.classList.add('hidden');
+
+  if (variant === null) {
+    panel.classList.add('hidden');
+    none.classList.remove('hidden');
+    incomeDocVariant = null;
+    return;
+  }
+
+  none.classList.add('hidden');
+  panel.classList.remove('hidden');
+
+  if (incomeDocVariant !== variant) {
+    incomeDocVariant = variant;
+    const cfg = INCOME_DOC_CONFIG[variant];
+    document.getElementById('income-doc-label').textContent = cfg.label;
+    document.getElementById('income-doc-hint').textContent = cfg.hint;
+    document.getElementById('income-doc-tip').innerHTML = cfg.tip;
+    resetUploadZone('zone-income-doc', 'file-income-doc', 'prev-income-doc', 'prev-income-doc-name');
+  }
+}
+
+document.querySelectorAll('input[name="receives_duo"], input[name="has_parttime_income"]').forEach(radio => {
+  radio.addEventListener('change', updateIncomeDocPanel);
+});
+
+updateIncomeDocPanel();
+
+/* ─── Bank connect (simulated PSD2, required) ─── */
 document.getElementById('btn-connect-bank').addEventListener('click', async () => {
   if (!tenantId) { toast('Complete step 1 first.', 'error'); return; }
   if (bankConnected) return;
@@ -110,8 +224,10 @@ document.getElementById('btn-connect-bank').addEventListener('click', async () =
 
     bankConnected = true;
     btn.classList.add('connected');
-    document.getElementById('bank-btn-label').textContent =
-      `✅ Connected — ${data.bank_name} · ${data.months_retrieved} months retrieved`;
+    document.getElementById('bank-status').classList.add('connected');
+    document.getElementById('bank-status-label').textContent =
+      `Status: ✅ Connected — ${data.bank_name} · ${data.months_retrieved} months retrieved`;
+    document.getElementById('err-bank').classList.remove('visible');
     toast('Bank connected successfully!', 'success');
   } catch (err) {
     toast(err.message, 'error');
@@ -227,20 +343,39 @@ document.getElementById('form-income').addEventListener('submit', async e => {
   e.preventDefault();
   clearErrors();
 
-  const employment = document.querySelector('input[name="employment_status"]:checked')?.value;
-  const amount     = parseFloat(document.getElementById('amount_requested').value);
-  const payslipFile= document.getElementById('file-payslip').files[0];
+  const employment   = document.querySelector('input[name="employment_status"]:checked')?.value;
+  const contractType = document.querySelector('input[name="contract_type"]:checked')?.value;
+  const selfEmpYears = document.querySelector('input[name="self_employed_duration"]:checked')?.value;
+  const receivesDuo  = document.querySelector('input[name="receives_duo"]:checked')?.value;
+  const parttimeInc  = document.querySelector('input[name="has_parttime_income"]:checked')?.value;
+  const residency    = document.querySelector('input[name="residency_status"]:checked')?.value;
+  const permitType   = document.querySelector('input[name="permit_type"]:checked')?.value;
+  const permitExpiry = document.getElementById('permit_expiry').value;
+  const incomeDocFile = document.getElementById('file-income-doc').files[0];
 
   let valid = true;
 
   if (!employment) { showError('err-employment'); valid = false; }
-  if (!amount || amount < 1000 || amount > 4000) { showError('err-amount'); valid = false; }
-
-  if (incomeMethod === 'bank' && !bankConnected) {
-    toast('Please connect your bank account first.', 'error'); valid = false;
+  if ((employment === 'employed_full_time' || employment === 'employed_part_time') && !contractType) {
+    showError('err-contract-type'); valid = false;
   }
-  if (incomeMethod === 'payslip' && !payslipFile) {
-    showError('err-payslip'); valid = false;
+  if (employment === 'self_employed' && !selfEmpYears) {
+    showError('err-self-employed'); valid = false;
+  }
+  if (employment === 'student') {
+    if (!receivesDuo) { showError('err-duo'); valid = false; }
+    if (!parttimeInc) { showError('err-parttime'); valid = false; }
+  }
+
+  if (!residency) { showError('err-residency'); valid = false; }
+  if (residency === 'non_eu_permit') {
+    if (!permitType)   { showError('err-permit-type'); valid = false; }
+    if (!permitExpiry) { showError('err-permit-expiry'); valid = false; }
+  }
+
+  if (!bankConnected) {
+    showError('err-bank');
+    toast('Please connect your bank account to continue.', 'error'); valid = false;
   }
 
   if (!valid) return;
@@ -249,14 +384,14 @@ document.getElementById('form-income').addEventListener('submit', async e => {
   setLoading(btn, true);
 
   try {
-    /* Upload payslip if chosen */
-    if (incomeMethod === 'payslip' && payslipFile) {
+    /* Upload income document if the applicant chose to add one (recommended, not required) */
+    if (incomeDocVariant && incomeDocFile) {
       const fdp = new FormData();
       fdp.append('tenant_id', tenantId);
-      fdp.append('doc_type', 'payslip');
-      fdp.append('file', payslipFile);
+      fdp.append('doc_type', INCOME_DOC_CONFIG[incomeDocVariant].docType);
+      fdp.append('file', incomeDocFile);
       const rp = await fetch('/api/v1/register/upload-document', { method: 'POST', body: fdp });
-      if (!rp.ok) { const ep = await rp.json(); throw new Error(ep.detail || 'Payslip upload failed.'); }
+      if (!rp.ok) { const ep = await rp.json(); throw new Error(ep.detail || 'Income document upload failed.'); }
     }
 
     /* POST income step */
@@ -264,7 +399,13 @@ document.getElementById('form-income').addEventListener('submit', async e => {
     fd.append('tenant_id', tenantId);
     fd.append('application_id', applicationId);
     fd.append('employment_status', employment);
-    fd.append('amount_requested', amount);
+    if (contractType) fd.append('contract_type', contractType);
+    if (selfEmpYears) fd.append('self_employed_duration', selfEmpYears);
+    if (receivesDuo)  fd.append('receives_duo', receivesDuo);
+    if (parttimeInc)  fd.append('has_parttime_income', parttimeInc);
+    fd.append('residency_status', residency);
+    if (permitType)   fd.append('permit_type', permitType);
+    if (permitExpiry) fd.append('permit_expiry_date', permitExpiry);
 
     const res = await fetch('/api/v1/register/income', { method: 'POST', body: fd });
     const data = await res.json();

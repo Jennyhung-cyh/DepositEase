@@ -14,7 +14,10 @@
       "Bash(git rm *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(uvicorn main:app --port 8124)",
+      "Bash(curl -s http://localhost:8124/ -o /tmp/page.html)",
+      "Read(//tmp/**)"
     ]
   }
 }

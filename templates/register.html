@@ -27,7 +27,7 @@
 <nav class="progress-wrap" id="stepProgress" aria-label="Application steps">
   <div class="step-item active" id="prog-1">
     <div class="step-circle">1</div>
-    <div class="step-label">Identity</div>
+    <div class="step-label">Identity Verification</div>
   </div>
   <div class="step-item" id="prog-2">
     <div class="step-circle">2</div>
@@ -88,10 +88,13 @@
 
     <!-- Date of birth -->
     <div class="form-group">
-      <label for="date_of_birth">Date of birth <span style="color:var(--orange)">*</span></label>
-      <input type="date" id="date_of_birth" name="date_of_birth"
-             max="" autocomplete="bday" />
-      <div class="field-error" id="err-dob">Please enter a valid date of birth.</div>
+      <label for="dob_input">Date of birth <span style="color:var(--orange)">*</span></label>
+      <div class="dob-field">
+        <span class="dob-icon" aria-hidden="true">📅</span>
+        <input type="text" id="dob_input" name="date_of_birth_display"
+               placeholder="DD-MM-YYYY" inputmode="numeric" maxlength="10" autocomplete="bday" />
+      </div>
+      <div class="field-error" id="err-dob">Enter a valid date of birth as DD-MM-YYYY (must be 18 or older).</div>
     </div>
 
     <!-- Email -->
@@ -119,27 +122,11 @@
         </div>
       </div>
       <div class="field-error" id="err-id-doc">Please upload your ID document.</div>
-    </div>
-
-    <!-- Selfie / liveness -->
-    <div class="form-group">
-      <label>Selfie / liveness check</label>
-      <div class="upload-zone" id="zone-selfie" role="button" aria-label="Upload selfie">
-        <input type="file" id="file-selfie" accept="image/*" capture="user" aria-label="Selfie file" />
-        <div class="upload-icon">🤳</div>
-        <div class="upload-text">
-          <strong>Take a selfie</strong> or upload a photo<br />
-          Must clearly show your face — no sunglasses or hats
-        </div>
-        <div class="upload-preview" id="prev-selfie">
-          <span>✅</span> <span id="prev-selfie-name"></span>
-        </div>
-      </div>
-      <div class="field-error" id="err-selfie">Please upload a selfie photo.</div>
-      <div class="liveness-note">
+      <div class="privacy-note">
         <span class="icon">🔒</span>
-        <span>Your photos are used for KYC only and never shared with third parties.
-        Stored in compliance with GDPR Article 9.</span>
+        <span>Your identity documents are used solely for verification and will not be
+        shared with third parties. We process and store this data in full compliance
+        with GDPR, including Article 9 provisions on sensitive personal data.</span>
       </div>
     </div>
 

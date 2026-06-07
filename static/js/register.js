@@ -81,7 +81,6 @@ function initUploadZone(zoneId, inputId, previewId, previewNameId) {
 }
 
 initUploadZone('zone-id',      'file-id',      'prev-id',      'prev-id-name');
-initUploadZone('zone-selfie',  'file-selfie',  'prev-selfie',  'prev-selfie-name');
 initUploadZone('zone-payslip', 'file-payslip', 'prev-payslip', 'prev-payslip-name');
 
 /* ─── Income method toggle ─── */
@@ -122,11 +121,26 @@ document.getElementById('btn-connect-bank').addEventListener('click', async () =
   }
 });
 
-/* ─── Set max DOB (must be 18+) ─── */
-const dobInput = document.getElementById('date_of_birth');
-const maxDob = new Date();
-maxDob.setFullYear(maxDob.getFullYear() - 18);
-dobInput.max = maxDob.toISOString().split('T')[0];
+/* ─── Date of birth: manual entry only (DD-MM-YYYY) ─── */
+const dobInput = document.getElementById('dob_input');
+
+/* Auto-format manual digits as DD-MM-YYYY while typing */
+dobInput.addEventListener('input', () => {
+  const digits = dobInput.value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length > 4) dobInput.value = `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4)}`;
+  else if (digits.length > 2) dobInput.value = `${digits.slice(0, 2)}-${digits.slice(2)}`;
+  else dobInput.value = digits;
+});
+
+/* Parses "DD-MM-YYYY" -> ISO "YYYY-MM-DD", or null if invalid/non-existent date */
+function parseDob(str) {
+  const m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(str.trim());
+  if (!m) return null;
+  const [, dd, mm, yyyy] = m;
+  const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+  if (d.getFullYear() != yyyy || d.getMonth() + 1 != mm || d.getDate() != dd) return null;
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 /* ─── STEP 1 SUBMIT ─── */
 document.getElementById('form-identity').addEventListener('submit', async e => {
@@ -138,10 +152,8 @@ document.getElementById('form-identity').addEventListener('submit', async e => {
     ? document.getElementById('bsn').value.trim()
     : document.getElementById('passport').value.trim();
   const fullName  = document.getElementById('full_name').value.trim();
-  const dob       = document.getElementById('date_of_birth').value;
   const email     = document.getElementById('email').value.trim();
   const idFile    = document.getElementById('file-id').files[0];
-  const selfieFile= document.getElementById('file-selfie').files[0];
 
   let valid = true;
 
@@ -152,12 +164,25 @@ document.getElementById('form-identity').addEventListener('submit', async e => {
     showError('err-passport'); document.getElementById('passport').classList.add('error'); valid = false;
   }
   if (!fullName) { showError('err-name'); valid = false; }
-  if (!dob)      { showError('err-dob');  valid = false; }
+
+  let dobIso = null;
+  if (!dobInput.value.trim()) {
+    showError('err-dob'); valid = false;
+  } else {
+    dobIso = parseDob(dobInput.value);
+    if (!dobIso) {
+      showError('err-dob'); valid = false;
+    } else {
+      const ageMs = new Date() - new Date(`${dobIso}T00:00:00`);
+      const age = ageMs / (365.25 * 24 * 3600 * 1000);
+      if (age < 18) { showError('err-dob', 'You must be at least 18 years old.'); valid = false; }
+    }
+  }
+
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showError('err-email'); valid = false;
   }
-  if (!idFile)    { showError('err-id-doc'); valid = false; }
-  if (!selfieFile){ showError('err-selfie'); valid = false; }
+  if (!idFile) { showError('err-id-doc'); valid = false; }
 
   if (!valid) return;
 
@@ -169,7 +194,7 @@ document.getElementById('form-identity').addEventListener('submit', async e => {
     const fd1 = new FormData();
     fd1.append('full_name', fullName);
     fd1.append('email', email);
-    fd1.append('date_of_birth', dob);
+    fd1.append('date_of_birth', dobIso);
     fd1.append('id_type', idType);
     fd1.append('id_number', idNumber);
 
@@ -187,14 +212,6 @@ document.getElementById('form-identity').addEventListener('submit', async e => {
     fd2.append('file', idFile);
     const r2 = await fetch('/api/v1/register/upload-document', { method: 'POST', body: fd2 });
     if (!r2.ok) { const e2 = await r2.json(); throw new Error(e2.detail || 'ID upload failed.'); }
-
-    /* 3. Upload selfie */
-    const fd3 = new FormData();
-    fd3.append('tenant_id', tenantId);
-    fd3.append('doc_type', 'selfie');
-    fd3.append('file', selfieFile);
-    const r3 = await fetch('/api/v1/register/upload-document', { method: 'POST', body: fd3 });
-    if (!r3.ok) { const e3 = await r3.json(); throw new Error(e3.detail || 'Selfie upload failed.'); }
 
     toast('Identity verified — step 2 of 3', 'success');
     goToStep(2);

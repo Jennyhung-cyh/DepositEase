@@ -84,6 +84,21 @@ class SyntheticBankStatement(Base):
     savings_balance = Column(Float, nullable=False)
     overdraft_count = Column(Integer, default=0)
     months_of_data = Column(Integer, default=6)
+
+    # DTI
+    monthly_debt_payments = Column(Float, default=0.0)
+
+    # Payment consistency
+    late_payments = Column(Integer, default=0)
+    total_payment_obligations = Column(Integer, default=0)
+
+    # Behavioral liquidity risk
+    overdraft_days = Column(Integer, default=0)
+    low_balance_days = Column(Integer, default=0)
+    rejected_transactions = Column(Integer, default=0)
+    total_transactions = Column(Integer, default=0)
+
+    # raw_json: per-month income/expenses + discretionary + daily balance stats
     raw_json = Column(Text, nullable=True)
     generated_at = Column(DateTime, default=datetime.utcnow)
 

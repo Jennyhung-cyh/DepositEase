@@ -3,6 +3,7 @@ import json
 import random
 from datetime import date, datetime
 from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
@@ -129,13 +130,44 @@ def connect_bank(
     monthly_expenses = round(monthly_income * random.uniform(0.45, 0.80), 2)
     savings_balance = round(random.uniform(500, 8_000), 2)
     overdraft_count = random.randint(0, 3)
+    monthly_debt_payments = round(monthly_income * random.uniform(0.0, 0.25), 2)
+
+    # Payment consistency
+    total_payment_obligations = random.randint(12, 30)
+    late_payments = random.choices([0, 1, 2, 3], weights=[60, 25, 10, 5])[0]
+
+    # Behavioral liquidity risk (aggregated over 6 months)
+    overdraft_days = random.choices(range(0, 16), weights=[40] + [6] * 10 + [4] * 5)[0]
+    total_transactions = random.randint(80, 200)
+    rejected_transactions = random.choices([0, 1, 2, 3, 4], weights=[55, 25, 12, 5, 3])[0]
 
     months = []
+    total_low_balance_days = 0
     for i in range(6):
+        month_income = round(monthly_income * random.uniform(0.92, 1.08), 2)
+        month_expenses = round(monthly_expenses * random.uniform(0.88, 1.12), 2)
+
+        disc_total = month_expenses * random.uniform(0.25, 0.45)
+        discretionary = {
+            "restaurant": round(disc_total * random.uniform(0.30, 0.50), 2),
+            "luxury": round(disc_total * random.uniform(0.05, 0.20), 2),
+            "irregular_transfers": round(disc_total * random.uniform(0.10, 0.30), 2),
+            "cash_withdrawals": round(disc_total * random.uniform(0.05, 0.20), 2),
+        }
+
+        avg_daily_balance = round(savings_balance * random.uniform(0.6, 1.4), 2)
+        std_daily_balance = round(avg_daily_balance * random.uniform(0.10, 0.40), 2)
+        month_low_days = random.choices(range(0, 8), weights=[50, 20, 12, 8, 5, 2, 2, 1])[0]
+        total_low_balance_days += month_low_days
+
         months.append({
             "month": i + 1,
-            "income": round(monthly_income * random.uniform(0.92, 1.08), 2),
-            "expenses": round(monthly_expenses * random.uniform(0.88, 1.12), 2),
+            "income": month_income,
+            "expenses": month_expenses,
+            "discretionary": discretionary,
+            "avg_daily_balance": avg_daily_balance,
+            "std_daily_balance": std_daily_balance,
+            "low_balance_days": month_low_days,
         })
 
     stmt = SyntheticBankStatement(
@@ -145,6 +177,13 @@ def connect_bank(
         savings_balance=savings_balance,
         overdraft_count=overdraft_count,
         months_of_data=6,
+        monthly_debt_payments=monthly_debt_payments,
+        late_payments=late_payments,
+        total_payment_obligations=total_payment_obligations,
+        overdraft_days=overdraft_days,
+        low_balance_days=total_low_balance_days,
+        rejected_transactions=rejected_transactions,
+        total_transactions=total_transactions,
         raw_json=json.dumps(months),
     )
     db.add(stmt)
@@ -164,13 +203,13 @@ def submit_income(
     tenant_id: int = Form(...),
     application_id: int = Form(...),
     employment_status: str = Form(...),                 # see EMPLOYMENT_STATUSES
-    contract_type: str | None = Form(None),             # required if employed full/part-time
-    self_employed_duration: str | None = Form(None),    # required if self-employed
-    receives_duo: str | None = Form(None),              # "yes" | "no" — required if student
-    has_parttime_income: str | None = Form(None),       # "yes" | "no" — required if student
+    contract_type: Optional[str] = Form(None),             # required if employed full/part-time
+    self_employed_duration: Optional[str] = Form(None),    # required if self-employed
+    receives_duo: Optional[str] = Form(None),              # "yes" | "no" — required if student
+    has_parttime_income: Optional[str] = Form(None),       # "yes" | "no" — required if student
     residency_status: str = Form(...),                  # see RESIDENCY_STATUSES
-    permit_type: str | None = Form(None),               # required if non-EU permit
-    permit_expiry_date: str | None = Form(None),        # required if non-EU permit, "YYYY-MM-DD"
+    permit_type: Optional[str] = Form(None),               # required if non-EU permit
+    permit_expiry_date: Optional[str] = Form(None),        # required if non-EU permit, "YYYY-MM-DD"
     db: Session = Depends(get_db),
 ):
     """Step 2 — record employment/residency profile.

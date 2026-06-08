@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 from database import Base, engine
 import models  # noqa: F401 — registers all ORM models before create_all
-from routers import registration
+from routers import registration, scoring
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,6 +15,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 app.include_router(registration.router)
+app.include_router(scoring.router)
 
 
 @app.get("/", response_class=HTMLResponse)

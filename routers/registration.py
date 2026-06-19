@@ -80,8 +80,8 @@ def submit_identity(
     return {"tenant_id": tenant.id, "application_id": app.id}
 
 
-DOC_TYPES = ("id_document", "selfie", "payslip", "tax_return", "duo_letter")
-DOC_TYPES_ALLOWING_PDF = ("payslip", "tax_return", "duo_letter")
+DOC_TYPES = ("id_document", "selfie", "payslip", "tax_return", "duo_letter", "rental_contract")
+DOC_TYPES_ALLOWING_PDF = ("payslip", "tax_return", "duo_letter", "rental_contract")
 
 
 @router.post("/upload-document")
@@ -268,6 +268,53 @@ def submit_income(
     if not app or app.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Application not found.")
 
+    app.status = "pending"
+    db.commit()
+
+    return {"status": "pending", "application_id": app.id, "next": "/rental"}
+
+
+VALID_REPAYMENT_MONTHS = {6, 12, 18, 24}
+
+
+@router.post("/rental")
+def submit_rental(
+    tenant_id: int = Form(...),
+    application_id: int = Form(...),
+    rental_address: str = Form(...),
+    rental_postal_code: str = Form(...),
+    deposit_amount: float = Form(...),
+    repayment_months: int = Form(...),
+    contract_term_months: Optional[int] = Form(None),
+    db: Session = Depends(get_db),
+):
+    """Step 3 — rental property details, deposit amount, and repayment term selection."""
+    tenant = db.get(Tenant, tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found.")
+
+    app = db.get(Application, application_id)
+    if not app or app.tenant_id != tenant_id:
+        raise HTTPException(status_code=404, detail="Application not found.")
+
+    if not (0 < deposit_amount <= 4000):
+        raise HTTPException(status_code=422, detail="Deposit amount must be between €1 and €4,000.")
+
+    if repayment_months not in VALID_REPAYMENT_MONTHS:
+        raise HTTPException(status_code=422, detail="Repayment term must be 6, 12, 18, or 24 months.")
+
+    min_months = contract_term_months if contract_term_months else 12
+    if repayment_months < min_months:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Repayment term must be at least {min_months} months to match the contract term.",
+        )
+
+    app.rental_address = rental_address.strip()
+    app.rental_postal_code = rental_postal_code.strip().upper()
+    app.contract_term_months = contract_term_months
+    app.amount_requested = deposit_amount
+    app.repayment_months = repayment_months
     app.status = "pending"
     db.commit()
 

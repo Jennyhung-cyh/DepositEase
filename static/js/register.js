@@ -56,8 +56,9 @@ function clearErrors() {
 function goToStep(n) {
   document.getElementById('step1').classList.toggle('hidden', n !== 1);
   document.getElementById('step2').classList.toggle('hidden', n !== 2);
+  document.getElementById('step3').classList.toggle('hidden', n !== 3);
 
-  ['prog-1', 'prog-2', 'prog-3'].forEach((id, i) => {
+  ['prog-1', 'prog-2', 'prog-3', 'prog-4'].forEach((id, i) => {
     const el = document.getElementById(id);
     el.classList.remove('active', 'done');
     if (i + 1 < n) el.classList.add('done');
@@ -144,6 +145,7 @@ function resetUploadZone(zoneId, inputId, previewId, previewNameId) {
 
 initUploadZone('zone-id',         'file-id',         'prev-id',         'prev-id-name');
 initUploadZone('zone-income-doc', 'file-income-doc', 'prev-income-doc', 'prev-income-doc-name');
+initUploadZone('zone-contract',   'file-contract',   'prev-contract',   'prev-contract-name');
 
 /* ─── Income document panel — type depends on employment situation ─── */
 /* Returns a doc-type key when determinable, null when confirmed not
@@ -329,8 +331,130 @@ document.getElementById('form-identity').addEventListener('submit', async e => {
     const r2 = await fetch('/api/v1/register/upload-document', { method: 'POST', body: fd2 });
     if (!r2.ok) { const e2 = await r2.json(); throw new Error(e2.detail || 'ID upload failed.'); }
 
-    toast('Identity verified — step 2 of 3', 'success');
+    toast('Identity verified — step 2 of 4', 'success');
     goToStep(2);
+  } catch (err) {
+    toast(err.message, 'error');
+  } finally {
+    setLoading(btn, false);
+  }
+});
+
+/* ─── Postal code auto-format ─── */
+document.getElementById('rental_postal_code').addEventListener('input', function () {
+  const digits = this.value.replace(/\s/g, '');
+  if (digits.length > 4) {
+    this.value = digits.slice(0, 4) + ' ' + digits.slice(4, 6).toUpperCase();
+  }
+});
+
+/* ─── Repayment term options (dynamic) ─── */
+/* Candidate options in months — filtered to [min_months, 24] */
+const REPAYMENT_CANDIDATES = [6, 12, 18, 24];
+
+function updateRepaymentOptions() {
+  const termSpecified = document.querySelector('input[name="contract_term_specified"]:checked')?.value;
+  document.getElementById('cond-term-months').classList.toggle('hidden', termSpecified !== 'yes');
+
+  let minMonths = 12;
+  if (termSpecified === 'yes') {
+    const raw = parseInt(document.getElementById('contract_term_months').value, 10);
+    if (!isNaN(raw) && raw > 0) minMonths = raw;
+  }
+
+  const options = REPAYMENT_CANDIDATES.filter(m => m >= minMonths && m <= 24);
+  if (options.length === 0) options.push(24);
+
+  const container = document.getElementById('repayment-options');
+  const currentSelected = document.querySelector('input[name="repayment_months"]:checked')?.value;
+  container.innerHTML = '';
+
+  const labels = { 6: '6 months', 12: '12 months (1 year)', 18: '18 months', 24: '24 months (2 years)' };
+  options.forEach(months => {
+    const checked = currentSelected == months ? 'checked' : '';
+    container.insertAdjacentHTML('beforeend',
+      `<input type="radio" name="repayment_months" id="rm-${months}" value="${months}" ${checked} />` +
+      `<label for="rm-${months}">${labels[months] || months + ' months'}</label>`
+    );
+  });
+}
+
+document.querySelectorAll('input[name="contract_term_specified"]').forEach(r => {
+  r.addEventListener('change', updateRepaymentOptions);
+});
+
+document.getElementById('contract_term_months').addEventListener('input', updateRepaymentOptions);
+
+/* ─── STEP 3 SUBMIT ─── */
+document.getElementById('form-rental').addEventListener('submit', async e => {
+  e.preventDefault();
+  clearErrors();
+
+  const address    = document.getElementById('rental_address').value.trim();
+  const postal     = document.getElementById('rental_postal_code').value.trim();
+  const deposit    = parseFloat(document.getElementById('deposit_amount').value);
+  const contractFile = document.getElementById('file-contract').files[0];
+  const termSpecified = document.querySelector('input[name="contract_term_specified"]:checked')?.value;
+  const termMonthsRaw = document.getElementById('contract_term_months').value;
+  const repayment  = document.querySelector('input[name="repayment_months"]:checked')?.value;
+
+  let valid = true;
+
+  if (!address) { showError('err-address'); valid = false; }
+
+  if (!/^\d{4}\s?[A-Za-z]{2}$/.test(postal)) {
+    showError('err-postal'); valid = false;
+  }
+
+  if (!contractFile) { showError('err-contract'); valid = false; }
+
+  if (termSpecified === 'yes') {
+    const tm = parseInt(termMonthsRaw, 10);
+    if (!tm || tm < 1) { showError('err-term-months'); valid = false; }
+  }
+
+  if (isNaN(deposit) || deposit <= 0 || deposit > 4000) {
+    showError('err-deposit'); valid = false;
+  }
+
+  if (!repayment) { showError('err-repayment'); valid = false; }
+
+  if (!valid) return;
+
+  const btn = document.getElementById('btn-rental');
+  setLoading(btn, true);
+
+  try {
+    /* Upload rental contract */
+    const fdContract = new FormData();
+    fdContract.append('tenant_id', tenantId);
+    fdContract.append('doc_type', 'rental_contract');
+    fdContract.append('file', contractFile);
+    const rc = await fetch('/api/v1/register/upload-document', { method: 'POST', body: fdContract });
+    if (!rc.ok) { const ec = await rc.json(); throw new Error(ec.detail || 'Contract upload failed.'); }
+
+    /* POST rental details */
+    const fd = new FormData();
+    fd.append('tenant_id', tenantId);
+    fd.append('application_id', applicationId);
+    fd.append('rental_address', address);
+    fd.append('rental_postal_code', postal);
+    fd.append('deposit_amount', deposit);
+    fd.append('repayment_months', repayment);
+    if (termSpecified === 'yes' && termMonthsRaw) {
+      fd.append('contract_term_months', parseInt(termMonthsRaw, 10));
+    }
+
+    const res = await fetch('/api/v1/register/rental', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Submission failed.');
+
+    toast('Application submitted! Running credit check...', 'success');
+    goToStep(4);
+
+    setTimeout(() => {
+      window.location.href = `/decision?application_id=${applicationId}`;
+    }, 1800);
   } catch (err) {
     toast(err.message, 'error');
   } finally {
@@ -411,13 +535,9 @@ document.getElementById('form-income').addEventListener('submit', async e => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Submission failed.');
 
-    toast('Application submitted! Running credit check...', 'success');
+    toast('Income verified — step 3 of 4', 'success');
+    updateRepaymentOptions();
     goToStep(3);
-
-    /* Redirect to scoring/decision page (to be built) */
-    setTimeout(() => {
-      window.location.href = `/decision?application_id=${applicationId}`;
-    }, 1800);
   } catch (err) {
     toast(err.message, 'error');
   } finally {

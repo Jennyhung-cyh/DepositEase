@@ -35,6 +35,10 @@
   </div>
   <div class="step-item" id="prog-3">
     <div class="step-circle">3</div>
+    <div class="step-label">Rental Details</div>
+  </div>
+  <div class="step-item" id="prog-4">
+    <div class="step-circle">4</div>
     <div class="step-label">Decision</div>
   </div>
 </nav>
@@ -335,6 +339,107 @@
     <div class="btn-row">
       <button type="button" class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
       <button type="submit" class="btn btn-primary" id="btn-income">
+        <span class="btn-label">Continue ↗</span>
+        <span class="spinner"></span>
+      </button>
+    </div>
+
+  </form>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     STEP 3 — Rental Details
+═══════════════════════════════════════════ -->
+<section id="step3" class="card hidden">
+  <h2 class="card-title">Rental details</h2>
+  <p class="card-subtitle">Tell us about the property and your rental agreement.</p>
+
+  <form id="form-rental" novalidate>
+
+    <!-- Address -->
+    <div class="form-group">
+      <label for="rental_address">Rental address <span style="color:var(--orange)">*</span></label>
+      <input type="text" id="rental_address" name="rental_address"
+             placeholder="Kalverstraat 1, Amsterdam" autocomplete="street-address" />
+      <div class="field-error" id="err-address">Please enter the rental address.</div>
+    </div>
+
+    <!-- Postal code -->
+    <div class="form-group">
+      <label for="rental_postal_code">Postal code <span style="color:var(--orange)">*</span></label>
+      <input type="text" id="rental_postal_code" name="rental_postal_code"
+             placeholder="1234 AB" maxlength="7" />
+      <div class="field-error" id="err-postal">Enter a valid Dutch postal code (e.g. 1234 AB).</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Contract upload -->
+    <div class="form-group">
+      <label>Rental contract <span style="color:var(--orange)">*</span></label>
+      <div class="upload-zone" id="zone-contract" role="button" aria-label="Upload rental contract">
+        <input type="file" id="file-contract" accept="image/*,.pdf" aria-label="Rental contract file" />
+        <div class="upload-icon">📋</div>
+        <div class="upload-text">
+          <strong>Drag & drop</strong> or click to upload<br />
+          Signed rental agreement (PDF or image)
+        </div>
+        <div class="upload-preview" id="prev-contract">
+          <span>✅</span> <span id="prev-contract-name"></span>
+        </div>
+      </div>
+      <div class="field-error" id="err-contract">Please upload your rental contract.</div>
+    </div>
+
+    <!-- Contract term specified? -->
+    <div class="form-group">
+      <label>Does your contract specify a fixed rental term?</label>
+      <div class="seg-control">
+        <input type="radio" name="contract_term_specified" id="term-yes" value="yes" />
+        <label for="term-yes">Yes</label>
+        <input type="radio" name="contract_term_specified" id="term-no" value="no" />
+        <label for="term-no">No / Not specified</label>
+      </div>
+
+      <div class="conditional-block hidden" id="cond-term-months">
+        <label for="contract_term_months">Contract duration (months) <span style="color:var(--orange)">*</span></label>
+        <input type="number" id="contract_term_months" name="contract_term_months"
+               min="1" max="120" placeholder="e.g. 12" />
+        <div class="field-error" id="err-term-months">Please enter the contract duration in months.</div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Deposit amount -->
+    <div class="form-group">
+      <label for="deposit_amount">Deposit required by landlord <span style="color:var(--orange)">*</span></label>
+      <div class="amount-group">
+        <span class="currency">€</span>
+        <input type="number" id="deposit_amount" name="deposit_amount"
+               min="1" max="4000" step="1" placeholder="2000" inputmode="numeric" />
+      </div>
+      <p class="amount-hint">Maximum deposit amount is €4,000.</p>
+      <div class="field-error" id="err-deposit">Please enter a valid deposit amount (max €4,000).</div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Repayment term -->
+    <div class="form-group">
+      <label>Preferred repayment term <span style="color:var(--orange)">*</span></label>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        Select how long you'd like to repay the deposit loan.
+      </p>
+      <div class="option-list" id="repayment-options">
+        <!-- populated dynamically based on contract term -->
+      </div>
+      <div class="field-error" id="err-repayment">Please select a repayment term.</div>
+    </div>
+
+    <div class="btn-row">
+      <button type="button" class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+      <button type="submit" class="btn btn-primary" id="btn-rental">
         <span class="btn-label">Submit application ↗</span>
         <span class="spinner"></span>
       </button>

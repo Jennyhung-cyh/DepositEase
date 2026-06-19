@@ -121,6 +121,11 @@ class Application(Base):
     payment_consistency = Column(Float, nullable=True)
     interest_rate = Column(Float, nullable=True)  # 8–12% based on score
 
+    # Rental property details (collected on step 3)
+    rental_address = Column(String(500), nullable=True)
+    rental_postal_code = Column(String(10), nullable=True)
+    contract_term_months = Column(Integer, nullable=True)  # null = not stated on contract
+
     # Loan terms
     monthly_repayment = Column(Float, nullable=True)
     repayment_months = Column(Integer, nullable=True)

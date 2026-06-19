@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}DepositEase — Rental deposit loans in the Netherlands{% endblock %}
+{% block content %}
+
+<section class="home-hero">
+  <div class="home-hero-brand">
+    <div class="logo-mark">D</div>
+    <div class="logo-text">Deposit<span>Ease</span></div>
+  </div>
+  <h1>Your rental deposit,<br>covered instantly.</h1>
+  <p>Get up to €4,000 — AI-powered credit decision in minutes, no guarantor needed.</p>
+  <div class="home-cta">
+    <a href="/apply" class="btn btn-primary">Apply now ↗</a>
+    <a href="/tenant" class="btn btn-ghost">My application</a>
+  </div>
+</section>
+
+<div style="max-width:680px;margin:0 auto;padding:0 24px 56px;">
+
+  <div class="feature-grid" style="margin-top:36px;">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Instant decision</h3>
+      <p>AI-powered credit scoring gives you an answer in under 5 minutes.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>No guarantor</h3>
+      <p>We assess your financial profile directly — no co-signer required.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💶</div>
+      <h3>Up to €4,000</h3>
+      <p>We cover the full deposit amount your landlord requires.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <h3>Flexible repayment</h3>
+      <p>Repay over 6–24 months at a rate starting from 8% per year.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:28px;">
+    <h2 class="card-title" style="margin-bottom:20px;">How it works</h2>
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div>
+          <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">Verify your identity &amp; income</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Upload your ID and connect your bank — takes about 2 minutes.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div>
+          <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">Share your rental details</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Upload your contract, confirm the deposit amount and choose a repayment term.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div>
+          <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">Get an instant decision</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Our AI scores your application and gives you an answer straight away.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div>
+          <p style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">We pay your landlord</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">DepositEase transfers the deposit directly to your landlord on your behalf.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:28px;padding-top:24px;border-top:1.5px solid var(--border);text-align:center;">
+      <a href="/apply" class="btn btn-primary" style="text-decoration:none;max-width:220px;display:inline-flex;">
+        Start your application ↗
+      </a>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,21 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apply — DepositEase</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/css/style.css" />
-</head>
-<body>
-
-<!-- Top bar -->
-<header class="topbar">
-  <div class="logo-mark">D</div>
-  <div class="logo-text">Deposit<span>Ease</span></div>
-</header>
+{% extends "base.html" %}
+{% block title %}Apply — DepositEase{% endblock %}
+{% block content %}
 
 <!-- Hero -->
 <section class="hero">
@@ -449,9 +434,5 @@
 </section>
 </main>
 
-<!-- Toast -->
-<div class="toast" id="toast" role="alert" aria-live="polite"></div>
-
-<script src="/static/js/register.js"></script>
-</body>
-</html>
+{% endblock %}
+{% block scripts %}<script src="/static/js/register.js"></script>{% endblock %}

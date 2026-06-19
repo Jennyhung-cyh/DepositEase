@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Deposit Guarantee — DepositEase{% endblock %}
+{% block content %}
+
+<section class="lookup-hero">
+  <h1>Deposit Guarantee</h1>
+  <p>Verify a tenant's deposit guarantee using their reference number.</p>
+</section>
+
+<main>
+
+<section id="lookup-card" class="card">
+  <h2 class="card-title">Look up a guarantee</h2>
+  <p class="card-subtitle">Enter the application reference provided by your tenant (e.g. DE-000002).</p>
+
+  <form id="form-lookup" novalidate>
+    <div class="form-group">
+      <label for="lookup-ref">Application reference <span style="color:var(--orange)">*</span></label>
+      <input type="text" id="lookup-ref" placeholder="DE-000002" maxlength="12" style="text-transform:uppercase;" />
+      <div class="field-error" id="err-lookup-ref">Please enter a valid reference number.</div>
+    </div>
+    <div class="btn-row" style="margin-top:20px;">
+      <button type="submit" class="btn btn-primary" id="btn-lookup">
+        <span class="btn-label">Verify guarantee ↗</span>
+        <span class="spinner"></span>
+      </button>
+    </div>
+  </form>
+</section>
+
+<section id="profile-card" class="card hidden">
+
+  <div id="banner-approved" class="hidden" style="background:rgba(46,125,50,.08);border:1.5px solid rgba(46,125,50,.25);border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
+    <span style="font-size:28px;">✅</span>
+    <div>
+      <p style="font-size:15px;font-weight:700;color:var(--success);">Deposit guaranteed by DepositEase</p>
+      <p style="font-size:13px;color:var(--muted);margin-top:2px;">This tenant's deposit is fully covered. DepositEase guarantees payment to you.</p>
+    </div>
+  </div>
+
+  <div id="banner-pending" class="callout callout-info hidden" style="margin-bottom:20px;">
+    <span class="icon">⏳</span>
+    <span>Application is under review. The guarantee will be confirmed once approved.</span>
+  </div>
+
+  <div id="banner-rejected" class="callout callout-warning hidden" style="margin-bottom:20px;">
+    <span class="icon">❌</span>
+    <span>This application was not approved. A deposit guarantee cannot be issued.</span>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+    <div>
+      <p class="section-label" style="margin-bottom:2px;">Reference</p>
+      <p id="profile-ref" style="font-size:20px;font-weight:800;color:var(--navy);"></p>
+    </div>
+    <span id="status-badge" class="status-badge"></span>
+  </div>
+
+  <hr class="divider" />
+
+  <div style="margin-bottom:20px;">
+    <p class="section-label">Tenant</p>
+    <p id="profile-tenant" style="font-size:15px;font-weight:600;color:var(--text);"></p>
+  </div>
+
+  <div id="section-property" class="hidden" style="margin-bottom:20px;">
+    <p class="section-label">Rental property</p>
+    <p id="profile-address" style="font-size:15px;font-weight:600;color:var(--text);"></p>
+    <p id="profile-postal" style="font-size:13px;color:var(--muted);margin-top:2px;"></p>
+  </div>
+
+  <hr class="divider" />
+
+  <p class="section-label">Guarantee details</p>
+  <div class="stat-grid">
+    <div class="stat-item">
+      <div class="stat-label">Deposit covered</div>
+      <div class="stat-value highlight" id="stat-deposit">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Guarantee period</div>
+      <div class="stat-value" id="stat-term">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Tenant repays monthly</div>
+      <div class="stat-value" id="stat-monthly">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Application date</div>
+      <div class="stat-value" id="stat-date" style="font-size:14px;"></div>
+    </div>
+  </div>
+
+  <div class="callout callout-info" style="margin-top:8px;">
+    <span class="icon">💡</span>
+    <span>The tenant repays DepositEase directly each month. Your deposit is protected for the full guarantee period.</span>
+  </div>
+
+  <hr class="divider" />
+
+  <div style="display:flex;justify-content:flex-end;">
+    <button class="btn btn-secondary" style="flex:unset;padding:10px 20px;font-size:14px;" onclick="resetLookup()">← Look up another</button>
+  </div>
+
+</section>
+
+</main>
+
+{% endblock %}
+{% block scripts %}<script src="/static/js/landlord.js"></script>{% endblock %}

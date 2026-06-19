@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}DepositEase{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css?v=4" />
+</head>
+<body>
+
+<!-- Sidebar drawer -->
+<nav class="sidebar" id="sidebar" aria-label="Main navigation">
+  <div class="sidebar-header">
+    <a href="/" class="sidebar-brand">
+      <div class="logo-mark">D</div>
+      <div class="logo-text">Deposit<span>Ease</span></div>
+    </a>
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+  </div>
+
+  <div class="sidebar-nav">
+    <a href="/" class="nav-item {% if page == 'home' %}active{% endif %}">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="/tenant" class="nav-item {% if page == 'tenant' %}active{% endif %}">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">My Application</span>
+    </a>
+    <a href="/apply" class="nav-item {% if page == 'apply' %}active{% endif %}">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Apply Now</span>
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <a href="/landlord" class="nav-item {% if page == 'landlord' %}active{% endif %}">
+      <span class="nav-icon">🏢</span>
+      <span class="nav-label">For Landlords</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Main content -->
+<div class="main-content">
+
+  <!-- Sticky topbar -->
+  <header class="main-topbar">
+    <button class="hamburger-btn" id="sidebarToggle" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <a href="/" class="topbar-brand">
+      <div class="t-mark">D</div>
+      <div class="t-name">Deposit<span>Ease</span></div>
+    </a>
+  </header>
+
+  {% block content %}{% endblock %}
+</div>
+
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<script>
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('sidebarOverlay');
+  const toggleBtn = document.getElementById('sidebarToggle');
+  const closeBtn  = document.getElementById('sidebarClose');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  toggleBtn.addEventListener('click', openSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

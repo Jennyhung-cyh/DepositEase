@@ -50,7 +50,11 @@
       "Bash(.venv/bin/python -m uvicorn main:app)",
       "Bash(echo \"EXIT: $?\")",
       "Bash(.venv/bin/python main.py)",
-      "Bash(.venv/bin/python -c \"import main; print\\('import OK'\\)\")"
+      "Bash(.venv/bin/python -c \"import main; print\\('import OK'\\)\")",
+      "Bash(.venv/bin/python -c \"import main; print\\('OK'\\)\")",
+      "Bash(.venv/bin/python seed.py)",
+      "Bash(pkill -f \"uvicorn main:app\")",
+      "Bash(.venv/bin/uvicorn main:app --reload --port 8000)"
     ]
   }
 }

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}My Application — DepositEase{% endblock %}
+{% block content %}
+
+<section class="lookup-hero">
+  <h1>My Application</h1>
+  <p>View your deposit loan status and repayment details.</p>
+</section>
+
+<main>
+
+<section id="lookup-card" class="card">
+  <h2 class="card-title">Look up your application</h2>
+  <p class="card-subtitle">Enter the email address you registered with.</p>
+
+  <form id="form-lookup" novalidate>
+    <div class="form-group">
+      <label for="lookup-email">Email address <span style="color:var(--orange)">*</span></label>
+      <input type="email" id="lookup-email" placeholder="jan@example.nl" autocomplete="email" />
+      <div class="field-error" id="err-lookup-email">Please enter a valid email address.</div>
+    </div>
+    <div class="btn-row" style="margin-top:20px;">
+      <button type="submit" class="btn btn-primary" id="btn-lookup">
+        <span class="btn-label">View my application ↗</span>
+        <span class="spinner"></span>
+      </button>
+    </div>
+  </form>
+</section>
+
+<section id="profile-card" class="card hidden">
+
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <p class="section-label" style="margin-bottom:2px;">Applicant</p>
+      <h2 id="profile-name" style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px;"></h2>
+      <p id="profile-ref" style="font-size:13px;color:var(--muted);font-weight:600;"></p>
+    </div>
+    <span id="status-badge" class="status-badge"></span>
+  </div>
+
+  <hr class="divider" />
+
+  <div id="section-property" class="hidden" style="margin-bottom:20px;">
+    <p class="section-label">Rental property</p>
+    <p id="profile-address" style="font-size:15px;font-weight:600;color:var(--text);"></p>
+    <p id="profile-postal" style="font-size:13px;color:var(--muted);margin-top:2px;"></p>
+  </div>
+  <div id="section-no-property" style="margin-bottom:20px;">
+    <p class="section-label">Rental property</p>
+    <p style="font-size:13px;color:var(--muted);">Not yet submitted — complete step 3 of your application.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <p class="section-label">Deposit summary</p>
+  <div class="stat-grid">
+    <div class="stat-item">
+      <div class="stat-label">Deposit amount</div>
+      <div class="stat-value highlight" id="stat-deposit">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Repayment term</div>
+      <div class="stat-value" id="stat-term">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Monthly repayment</div>
+      <div class="stat-value" id="stat-monthly">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Interest rate (p.a.)</div>
+      <div class="stat-value" id="stat-rate">—</div>
+    </div>
+  </div>
+
+  <div id="section-score" class="hidden">
+    <hr class="divider" />
+    <p class="section-label">Credit assessment</p>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:10px;">
+      <div class="score-circle"><span id="score-value"></span></div>
+      <div>
+        <p id="score-label" style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:2px;"></p>
+        <p id="score-reason" style="font-size:13px;color:var(--muted);line-height:1.4;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="section-pending" class="callout callout-info hidden" style="margin-top:20px;">
+    <span class="icon">⏳</span>
+    <span>Your application is under review. This page will reflect the decision once complete.</span>
+  </div>
+
+  <div id="section-rejected" class="callout callout-warning hidden" style="margin-top:20px;">
+    <span class="icon">❌</span>
+    <span id="rejected-reason"></span>
+  </div>
+
+  <hr class="divider" />
+
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <p id="profile-date" style="font-size:12px;color:var(--muted);"></p>
+    <button class="btn btn-secondary" style="flex:unset;padding:10px 20px;font-size:14px;" onclick="resetLookup()">← Look up another</button>
+  </div>
+
+</section>
+
+</main>
+
+{% endblock %}
+{% block scripts %}<script src="/static/js/tenant.js"></script>{% endblock %}

@@ -209,6 +209,7 @@ Full interactive docs available at **http://localhost:8000/docs**
 - **AFM licensing** — real money lending requires AFM authorisation; this MVP simulates the product under a partnership model assumption
 - **Landlord passwords** — currently hardcoded for MVP; should be moved to environment variables before production deployment
 - **404 handling** — unknown URLs return a styled HTML error page; API routes (`/api/v1/...`) still return JSON errors as expected
+- **"Others" landlord** — tenants can select "Others" as their property manager during application, but this company has no portal login; the landlord portal is limited to Holland2Stay, Our Domain, Vesteda, and Greystar for the MVP
 
 ---
 

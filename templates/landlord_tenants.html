@@ -87,6 +87,13 @@
     </div>
   </div>
 
+  <!-- Payout notifications -->
+  <div id="payout-section" class="card hidden" style="margin-bottom:20px;">
+    <h2 class="card-title" style="margin-bottom:4px;">Payout notifications</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Deposits confirmed as transferred to your account on behalf of each tenant.</p>
+    <div id="payout-list"></div>
+  </div>
+
   <!-- Table -->
   <div class="card" style="padding:0;overflow:hidden;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;">
@@ -211,6 +218,30 @@ async function loadOverview(token, landlord) {
 
   allTenants = data.tenants;
   applyFilter('all');
+
+  /* Payout notifications */
+  const payouts = data.tenants.filter(t => t.payout_date);
+  const payoutSection = document.getElementById('payout-section');
+  if (payouts.length) {
+    payoutSection.classList.remove('hidden');
+    document.getElementById('payout-list').innerHTML = payouts.map(t => `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--border);">
+        <span style="font-size:18px;color:#059669;flex-shrink:0;">✓</span>
+        <div>
+          <p style="font-weight:700;color:var(--navy);margin-bottom:2px;">
+            ${t.reference} · ${t.tenant_first_name}
+            <span style="font-weight:400;color:var(--muted);"> · ${t.rental_address || '—'}</span>
+          </p>
+          <p style="font-size:13px;color:var(--muted);">
+            <strong style="color:#059669;">${fmtEur(t.deposit_amount)}</strong> transferred on ${fmtDate(t.payout_date)}
+          </p>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    payoutSection.classList.add('hidden');
+  }
+
   return true;
 }
 

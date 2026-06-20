@@ -131,6 +131,7 @@ def get_landlord_overview(
             "deposit_amount": app.amount_requested,
             "monthly_repayment": app.monthly_repayment,
             "repayment_months": app.repayment_months,
+            "payout_date": app.created_at.isoformat() if app.status == "approved" and app.created_at else None,
             "created_at": app.created_at.isoformat() if app.created_at else None,
         })
 

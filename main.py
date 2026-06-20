@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 from database import Base, engine
 import models  # noqa: F401 — registers all ORM models before create_all
-from routers import registration, scoring, views, admin
+from routers import registration, scoring, views, admin, landlord_auth
 
 Base.metadata.create_all(bind=engine)
 
@@ -18,6 +18,7 @@ app.include_router(registration.router)
 app.include_router(scoring.router)
 app.include_router(views.router)
 app.include_router(admin.router)
+app.include_router(landlord_auth.router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -38,6 +39,11 @@ def tenant_view(request: Request):
 @app.get("/landlord", response_class=HTMLResponse)
 def landlord_view(request: Request):
     return templates.TemplateResponse("landlord.html", {"request": request, "page": "landlord"})
+
+
+@app.get("/landlord/tenants", response_class=HTMLResponse)
+def landlord_tenants_view(request: Request):
+    return templates.TemplateResponse("landlord_tenants.html", {"request": request, "page": "landlord"})
 
 
 @app.get("/decision", response_class=HTMLResponse)

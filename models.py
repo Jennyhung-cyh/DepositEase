@@ -130,6 +130,8 @@ class Application(Base):
     monthly_repayment = Column(Float, nullable=True)
     repayment_months = Column(Integer, nullable=True)
 
+    landlord_name = Column(String(200), nullable=True)
+
     decision_reason = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

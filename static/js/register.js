@@ -340,6 +340,13 @@ document.getElementById('form-identity').addEventListener('submit', async e => {
   }
 });
 
+/* ─── Landlord "Others" toggle ─── */
+document.querySelectorAll('input[name="landlord_name"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('cond-landlord-other').classList.toggle('hidden', r.value !== 'others');
+  });
+});
+
 /* ─── Postal code auto-format ─── */
 document.getElementById('rental_postal_code').addEventListener('input', function () {
   const digits = this.value.replace(/\s/g, '');
@@ -381,6 +388,9 @@ document.getElementById('form-rental').addEventListener('submit', async e => {
   const contractFile  = document.getElementById('file-contract').files[0];
   const termSpecified = document.querySelector('input[name="contract_term_specified"]:checked')?.value;
   const termMonthsRaw = document.getElementById('contract_term_months').value;
+  const landlordRaw   = document.querySelector('input[name="landlord_name"]:checked')?.value;
+  const landlordOther = document.getElementById('landlord_name_other').value.trim();
+  const landlord      = landlordRaw === 'others' ? landlordOther : landlordRaw;
 
   // Repayment months = contract term (or 12 if no fixed term stated)
   let repaymentMonths = 12;
@@ -393,6 +403,8 @@ document.getElementById('form-rental').addEventListener('submit', async e => {
 
   if (!address) { showError('err-address'); valid = false; }
   if (!/^\d{4}\s?[A-Za-z]{2}$/.test(postal)) { showError('err-postal'); valid = false; }
+  if (!landlordRaw) { showError('err-landlord'); valid = false; }
+  if (landlordRaw === 'others' && !landlordOther) { showError('err-landlord'); valid = false; }
   if (!contractFile) { showError('err-contract'); valid = false; }
   if (termSpecified === 'yes') {
     const tm = parseInt(termMonthsRaw, 10);
@@ -423,6 +435,7 @@ document.getElementById('form-rental').addEventListener('submit', async e => {
     fd.append('rental_postal_code', postal);
     fd.append('deposit_amount', deposit);
     fd.append('repayment_months', repaymentMonths);
+    fd.append('landlord_name', landlord);
     if (termSpecified === 'yes') fd.append('contract_term_months', repaymentMonths);
 
     const res = await fetch('/api/v1/register/rental', { method: 'POST', body: fd });

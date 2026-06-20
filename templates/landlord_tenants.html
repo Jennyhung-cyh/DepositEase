@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% block title %}My Tenants — DepositEase{% endblock %}
+{% block content %}
+
+<section class="lookup-hero">
+  <h1>My Tenants</h1>
+  <p>View all deposit applications associated with your properties.</p>
+</section>
+
+<main>
+
+<!-- Login card -->
+<section id="login-card" class="card">
+  <h2 class="card-title">Sign in to your account</h2>
+  <p class="card-subtitle">Select your company and enter your password to view your tenants.</p>
+
+  <form id="form-login" novalidate>
+
+    <div class="form-group">
+      <label>Company <span style="color:var(--orange)">*</span></label>
+      <div class="option-list">
+        <input type="radio" name="landlord" id="ll-holland2stay" value="Holland2Stay" />
+        <label for="ll-holland2stay">Holland2Stay</label>
+        <input type="radio" name="landlord" id="ll-ourdomain" value="Our Domain" />
+        <label for="ll-ourdomain">Our Domain</label>
+        <input type="radio" name="landlord" id="ll-vesteda" value="Vesteda" />
+        <label for="ll-vesteda">Vesteda</label>
+        <input type="radio" name="landlord" id="ll-greystar" value="Greystar" />
+        <label for="ll-greystar">Greystar</label>
+        <input type="radio" name="landlord" id="ll-others" value="others" />
+        <label for="ll-others">Others</label>
+      </div>
+      <div class="conditional-block hidden" id="cond-other">
+        <input type="text" id="landlord-other" placeholder="Enter company name" />
+      </div>
+      <div class="field-error" id="err-company">Please select your company.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password <span style="color:var(--orange)">*</span></label>
+      <input type="password" id="password" placeholder="Enter your company password" autocomplete="current-password" />
+      <div class="field-error" id="err-password">Please enter your password.</div>
+    </div>
+
+    <div class="callout callout-warning hidden" id="err-auth" style="margin-bottom:12px;">
+      <span class="icon">❌</span>
+      <span id="err-auth-text">Invalid company or password.</span>
+    </div>
+
+    <div class="btn-row" style="margin-top:20px;">
+      <button type="submit" class="btn btn-primary" id="btn-login">
+        <span class="btn-label">Sign in ↗</span>
+        <span class="spinner"></span>
+      </button>
+    </div>
+  </form>
+</section>
+
+<!-- Overview (shown after login) -->
+<section id="overview-card" class="hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+    <div>
+      <p class="section-label" style="margin-bottom:2px;">Signed in as</p>
+      <h2 id="landlord-name" style="font-size:22px;font-weight:800;color:var(--navy);"></h2>
+    </div>
+    <button class="btn btn-secondary" style="flex:unset;padding:10px 20px;font-size:14px;" id="btn-logout">Sign out</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid" style="margin-bottom:24px;">
+    <div class="stat-item">
+      <div class="stat-label">Total tenants</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Approved</div>
+      <div class="stat-value" style="color:#059669;" id="stat-approved">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Pending</div>
+      <div class="stat-value" style="color:#d97706;" id="stat-pending">—</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Total deposit value</div>
+      <div class="stat-value highlight" id="stat-value">—</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;">
+      <h2 style="font-size:16px;font-weight:700;color:var(--navy);margin:0;">Tenants</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="approved">Approved</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="background:var(--surface);text-align:left;">
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Ref</th>
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Tenant</th>
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Property</th>
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Status</th>
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Deposit</th>
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Monthly</th>
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Term</th>
+            <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Applied</th>
+          </tr>
+        </thead>
+        <tbody id="tenants-body">
+          <tr><td colspan="8" style="padding:32px;text-align:center;color:var(--muted);">No tenants yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="empty-state" class="hidden" style="padding:40px;text-align:center;color:var(--muted);">No tenants match this filter.</div>
+  </div>
+
+  <div style="margin-top:16px;text-align:right;">
+    <a href="/landlord" style="font-size:13px;color:var(--muted);text-decoration:none;">Look up individual application by reference →</a>
+  </div>
+
+</section>
+
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+const STATUS_STYLE = {
+  approved: { label: 'Approved', color: '#059669', bg: '#d1fae5' },
+  pending:  { label: 'Pending',  color: '#d97706', bg: '#fef3c7' },
+  draft:    { label: 'Draft',    color: '#6b7280', bg: '#f3f4f6' },
+  rejected: { label: 'Rejected', color: '#dc2626', bg: '#fee2e2' },
+};
+
+let allTenants = [];
+let sessionToken = sessionStorage.getItem('landlord_token');
+let sessionLandlord = sessionStorage.getItem('landlord_name');
+
+function fmtEur(val) {
+  if (val == null) return '—';
+  return '€' + Number(val).toLocaleString('nl-NL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('tenants-body');
+  const empty = document.getElementById('empty-state');
+  if (!rows.length) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  tbody.innerHTML = rows.map(r => {
+    const st = STATUS_STYLE[r.status] || STATUS_STYLE.draft;
+    const badge = `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;color:${st.color};background:${st.bg};">${st.label}</span>`;
+    const address = r.rental_address
+      ? `<div style="font-weight:600;color:var(--text);">${r.rental_address}</div><div style="font-size:11px;color:var(--muted);">${r.rental_postal_code || ''}</div>`
+      : '<span style="color:var(--muted);">—</span>';
+    return `<tr style="border-top:1px solid var(--border);">
+      <td style="padding:12px 16px;font-weight:600;color:var(--navy);">${r.reference}</td>
+      <td style="padding:12px 16px;font-weight:600;">${r.tenant_first_name}</td>
+      <td style="padding:12px 16px;">${address}</td>
+      <td style="padding:12px 16px;">${badge}</td>
+      <td style="padding:12px 16px;font-weight:600;">${fmtEur(r.deposit_amount)}</td>
+      <td style="padding:12px 16px;">${fmtEur(r.monthly_repayment)}</td>
+      <td style="padding:12px 16px;">${r.repayment_months ? r.repayment_months + ' mo' : '—'}</td>
+      <td style="padding:12px 16px;color:var(--muted);white-space:nowrap;">${fmtDate(r.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function applyFilter(filter) {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  let filtered = allTenants;
+  if (filter === 'approved') filtered = allTenants.filter(r => r.status === 'approved');
+  if (filter === 'pending')  filtered = allTenants.filter(r => r.status === 'pending' || r.status === 'draft');
+  renderTable(filtered);
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+async function loadOverview(token, landlord) {
+  const res  = await fetch('/api/v1/profile/landlord-overview?landlord=' + encodeURIComponent(landlord), {
+    headers: { 'x-landlord-token': token },
+  });
+  if (res.status === 401) {
+    sessionStorage.removeItem('landlord_token');
+    sessionStorage.removeItem('landlord_name');
+    return false;
+  }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || 'Failed to load.');
+
+  document.getElementById('login-card').classList.add('hidden');
+  document.getElementById('overview-card').classList.remove('hidden');
+  document.getElementById('landlord-name').textContent = data.landlord;
+  document.getElementById('stat-total').textContent    = data.stats.total;
+  document.getElementById('stat-approved').textContent = data.stats.approved;
+  document.getElementById('stat-pending').textContent  = data.stats.pending;
+  document.getElementById('stat-value').textContent    = fmtEur(data.stats.total_deposit_value);
+
+  allTenants = data.tenants;
+  applyFilter('all');
+  return true;
+}
+
+/* Auto-restore session */
+if (sessionToken && sessionLandlord) {
+  loadOverview(sessionToken, sessionLandlord).catch(() => {});
+}
+
+/* Others toggle */
+document.querySelectorAll('input[name="landlord"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('cond-other').classList.toggle('hidden', r.value !== 'others');
+  });
+});
+
+/* Login */
+document.getElementById('form-login').addEventListener('submit', async e => {
+  e.preventDefault();
+  document.getElementById('err-company').classList.remove('visible');
+  document.getElementById('err-password').classList.remove('visible');
+  document.getElementById('err-auth').classList.add('hidden');
+
+  const selected = document.querySelector('input[name="landlord"]:checked')?.value;
+  const other    = document.getElementById('landlord-other').value.trim();
+  const landlord = selected === 'others' ? other : selected;
+  const password = document.getElementById('password').value;
+
+  let valid = true;
+  if (!selected || (selected === 'others' && !other)) {
+    document.getElementById('err-company').classList.add('visible'); valid = false;
+  }
+  if (!password) {
+    document.getElementById('err-password').classList.add('visible'); valid = false;
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById('btn-login');
+  btn.classList.add('loading'); btn.disabled = true;
+
+  try {
+    const res  = await fetch('/api/v1/landlord/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ landlord, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      document.getElementById('err-auth-text').textContent = data.detail || 'Invalid credentials.';
+      document.getElementById('err-auth').classList.remove('hidden');
+      return;
+    }
+    sessionStorage.setItem('landlord_token', data.token);
+    sessionStorage.setItem('landlord_name', data.landlord);
+    await loadOverview(data.token, data.landlord);
+  } catch (err) {
+    document.getElementById('err-auth-text').textContent = err.message;
+    document.getElementById('err-auth').classList.remove('hidden');
+  } finally {
+    btn.classList.remove('loading'); btn.disabled = false;
+  }
+});
+
+/* Logout */
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  const token = sessionStorage.getItem('landlord_token');
+  if (token) await fetch('/api/v1/landlord/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
+  sessionStorage.removeItem('landlord_token');
+  sessionStorage.removeItem('landlord_name');
+  document.getElementById('overview-card').classList.add('hidden');
+  document.getElementById('login-card').classList.remove('hidden');
+});
+</script>
+
+<style>
+.filter-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+.filter-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+</style>
+{% endblock %}

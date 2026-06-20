@@ -103,6 +103,36 @@ function showProfile(data) {
 
   document.getElementById('profile-date').textContent =
     data.created_at ? 'Applied on ' + fmtDate(data.created_at) : '';
+
+  /* Repayment progress */
+  const rep = data.repayment_schedule;
+  const repSection = document.getElementById('section-repayment');
+  if (rep) {
+    repSection.classList.remove('hidden');
+
+    const pct = rep.months_total > 0 ? Math.round(rep.months_paid / rep.months_total * 100) : 0;
+    document.getElementById('rep-month-label').textContent =
+      `Month ${rep.months_paid} of ${rep.months_total}`;
+    document.getElementById('rep-balance').textContent =
+      rep.months_remaining > 0
+        ? `— ${fmtEur(rep.remaining_balance)} remaining`
+        : '— Fully repaid';
+    document.getElementById('rep-bar').style.width = pct + '%';
+
+    document.getElementById('rep-schedule').innerHTML = rep.schedule.map(r => {
+      const status = r.paid
+        ? `<span style="color:#059669;font-weight:700;">✓ Paid</span>`
+        : `<span style="color:var(--muted);">○ Upcoming</span>`;
+      return `<tr style="border-top:1px solid var(--border);">
+        <td style="padding:10px 12px 10px 0;font-weight:600;color:var(--navy);">${r.month}</td>
+        <td style="padding:10px 12px;color:var(--muted);">${fmtDate(r.date)}</td>
+        <td style="padding:10px 12px;font-weight:600;">${fmtEur(r.amount)}</td>
+        <td style="padding:10px 0 10px 12px;">${status}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    repSection.classList.add('hidden');
+  }
 }
 
 function resetLookup() {

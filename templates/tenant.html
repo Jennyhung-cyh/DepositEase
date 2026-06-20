@@ -95,6 +95,35 @@
     <span id="rejected-reason"></span>
   </div>
 
+  <!-- Repayment progress (approved only) -->
+  <div id="section-repayment" class="hidden">
+    <hr class="divider" />
+    <p class="section-label">Repayment progress</p>
+
+    <div style="display:flex;align-items:baseline;gap:8px;margin:10px 0 6px;">
+      <span id="rep-month-label" style="font-size:20px;font-weight:800;color:var(--navy);"></span>
+      <span id="rep-balance" style="font-size:13px;color:var(--muted);"></span>
+    </div>
+
+    <div style="background:var(--border);border-radius:99px;height:8px;margin-bottom:20px;">
+      <div id="rep-bar" style="background:var(--navy);height:8px;border-radius:99px;transition:width .4s;width:0%;"></div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="text-align:left;">
+            <th style="padding:6px 12px 6px 0;color:var(--muted);font-weight:600;">Month</th>
+            <th style="padding:6px 12px;color:var(--muted);font-weight:600;">Due date</th>
+            <th style="padding:6px 12px;color:var(--muted);font-weight:600;">Amount</th>
+            <th style="padding:6px 0 6px 12px;color:var(--muted);font-weight:600;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="rep-schedule"></tbody>
+      </table>
+    </div>
+  </div>
+
   <hr class="divider" />
 
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
@@ -107,4 +136,4 @@
 </main>
 
 {% endblock %}
-{% block scripts %}<script src="/static/js/tenant.js?v=2"></script>{% endblock %}
+{% block scripts %}<script src="/static/js/tenant.js?v=3"></script>{% endblock %}

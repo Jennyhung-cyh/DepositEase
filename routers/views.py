@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -5,6 +7,34 @@ from typing import Optional
 from database import get_db
 from models import Tenant, Application
 from routers.landlord_auth import verify_token
+
+
+def _repayment_schedule(app: Application) -> Optional[dict]:
+    if app.status != "approved" or not all([app.monthly_repayment, app.repayment_months, app.created_at]):
+        return None
+
+    months_elapsed = max(0, (datetime.utcnow() - app.created_at).days // 30)
+    months_paid    = min(months_elapsed, app.repayment_months)
+    months_remaining = app.repayment_months - months_paid
+
+    schedule = []
+    for i in range(app.repayment_months):
+        payment_date = app.created_at + timedelta(days=30 * (i + 1))
+        schedule.append({
+            "month":  i + 1,
+            "date":   payment_date.isoformat(),
+            "amount": app.monthly_repayment,
+            "paid":   i < months_paid,
+        })
+
+    return {
+        "months_paid":       months_paid,
+        "months_total":      app.repayment_months,
+        "months_remaining":  months_remaining,
+        "amount_paid":       round(months_paid * app.monthly_repayment, 2),
+        "remaining_balance": round(months_remaining * app.monthly_repayment, 2),
+        "schedule":          schedule,
+    }
 
 router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
 
@@ -40,6 +70,7 @@ def get_tenant_profile(email: str = Query(...), db: Session = Depends(get_db)):
         "credit_score": app.credit_score,
         "decision_reason": app.decision_reason,
         "created_at": app.created_at.isoformat() if app.created_at else None,
+        "repayment_schedule": _repayment_schedule(app),
     }
 
 

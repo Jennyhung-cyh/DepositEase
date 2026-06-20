@@ -130,6 +130,7 @@ class Application(Base):
     monthly_repayment = Column(Float, nullable=True)
     repayment_months = Column(Integer, nullable=True)
 
+    monthly_rent = Column(Float, nullable=True)
     landlord_name = Column(String(200), nullable=True)
 
     decision_reason = Column(Text, nullable=True)

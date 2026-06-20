@@ -434,6 +434,7 @@ document.getElementById('form-rental').addEventListener('submit', async e => {
     fd.append('rental_address', address);
     fd.append('rental_postal_code', postal);
     fd.append('deposit_amount', deposit);
+    fd.append('monthly_rent', monthlyRent);
     fd.append('repayment_months', repaymentMonths);
     fd.append('landlord_name', landlord);
     if (termSpecified === 'yes') fd.append('contract_term_months', repaymentMonths);

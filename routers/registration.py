@@ -281,6 +281,7 @@ def submit_rental(
     rental_address: str = Form(...),
     rental_postal_code: str = Form(...),
     deposit_amount: float = Form(...),
+    monthly_rent: float = Form(...),
     repayment_months: int = Form(...),
     landlord_name: Optional[str] = Form(None),
     contract_term_months: Optional[int] = Form(None),
@@ -312,6 +313,7 @@ def submit_rental(
     app.rental_postal_code = rental_postal_code.strip().upper()
     app.contract_term_months = contract_term_months
     app.amount_requested = deposit_amount
+    app.monthly_rent = monthly_rent
     app.repayment_months = repayment_months
     app.landlord_name = landlord_name.strip() if landlord_name else None
     app.status = "pending"

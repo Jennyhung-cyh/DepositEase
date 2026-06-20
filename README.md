@@ -118,15 +118,16 @@ Then open **http://localhost:8000** in your browser.
 
 ## Pages
 
-| URL | Description | Access |
-|-----|-------------|--------|
-| `/` | Home page | Public |
-| `/apply` | Tenant application (3 steps) | Public |
-| `/decision?application_id=` | Credit decision result | Public |
-| `/tenant` | Repayment dashboard (lookup by email) | Tenant |
-| `/landlord` | Guarantee lookup by reference number | Landlord |
-| `/landlord/tenants` | Company portal (login required) | Landlord |
-| `/admin` | Internal portfolio overview | Internal |
+| URL | Full local URL | Description | Access |
+|-----|---------------|-------------|--------|
+| `/` | http://localhost:8000/ | Home page | Public |
+| `/apply` | http://localhost:8000/apply | Tenant application (3 steps) | Public |
+| `/decision?application_id=1` | http://localhost:8000/decision?application_id=1 | Credit decision result | Public |
+| `/tenant` | http://localhost:8000/tenant | Repayment dashboard (lookup by email) | Tenant |
+| `/landlord` | http://localhost:8000/landlord | Guarantee lookup by reference number | Landlord |
+| `/landlord/tenants` | http://localhost:8000/landlord/tenants | Company portal (login required) | Landlord |
+| `/admin` | http://localhost:8000/admin | Internal portfolio overview | Internal |
+| `/docs` | http://localhost:8000/docs | Interactive API documentation | Internal |
 
 ---
 

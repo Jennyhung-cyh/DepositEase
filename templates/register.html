@@ -370,6 +370,30 @@
 
     <hr class="divider" />
 
+    <!-- Landlord -->
+    <div class="form-group">
+      <label>Landlord / property manager <span style="color:var(--orange)">*</span></label>
+      <div class="option-list">
+        <input type="radio" name="landlord_name" id="ll-holland2stay" value="Holland2Stay" />
+        <label for="ll-holland2stay">Holland2Stay</label>
+        <input type="radio" name="landlord_name" id="ll-ourdomain" value="Our Domain" />
+        <label for="ll-ourdomain">Our Domain</label>
+        <input type="radio" name="landlord_name" id="ll-vesteda" value="Vesteda" />
+        <label for="ll-vesteda">Vesteda</label>
+        <input type="radio" name="landlord_name" id="ll-greystar" value="Greystar" />
+        <label for="ll-greystar">Greystar</label>
+        <input type="radio" name="landlord_name" id="ll-others" value="others" />
+        <label for="ll-others">Others</label>
+      </div>
+      <div class="conditional-block hidden" id="cond-landlord-other">
+        <label for="landlord_name_other">Landlord name <span style="color:var(--orange)">*</span></label>
+        <input type="text" id="landlord_name_other" placeholder="e.g. Amvest, private landlord…" />
+      </div>
+      <div class="field-error" id="err-landlord">Please select your landlord.</div>
+    </div>
+
+    <hr class="divider" />
+
     <!-- Contract upload -->
     <div class="form-group">
       <label>Rental contract <span style="color:var(--orange)">*</span></label>

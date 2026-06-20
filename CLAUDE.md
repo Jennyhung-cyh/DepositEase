@@ -4,28 +4,48 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Project overview
 DepositEase is a rental deposit financing platform for the Dutch housing market (RSM Fintech MVP).
-Tenants apply for deposit loans (€1,000–€4,000), the platform runs AI credit scoring, and the landlord receives a simulated payout notification.
+Tenants apply for deposit loans, the platform runs AI credit scoring, and the landlord receives a simulated payout notification.
 
 ## Stack
 - Backend: Python / FastAPI
 - Frontend: HTML + vanilla JS
 - Database: SQLite
 - Data: synthetic bank statement generator (no real Open Banking integration)
-- Deployment: Render or Railway
+- Deployment: Render or Railway (not yet deployed — runs locally for MVP)
 
-## Key features to implement
+## Implemented features
 1. Tenant registration + document upload form (synthetic data)
-2. AI credit scoring engine (affordability ratio, DTI, cash flow variance, payment consistency)
+2. AI credit scoring engine (affordability ratio, DTI, cash flow variance, payment consistency, behavioral liquidity risk)
 3. Loan decision output with interest rate (8–12% based on credit score)
-4. Landlord notification page (simulated payout confirmation)
-5. Tenant repayment dashboard (monthly amount, remaining installments)
+4. Landlord notification page with simulated payout confirmation
+5. Tenant repayment dashboard (monthly amount, remaining installments, payment schedule)
 6. Admin backend (loan portfolio overview, overdue alerts)
+7. Landlord company authentication (per-company password, 8-hour session token)
+8. Landlord tenant overview portal (filtered by company, with payout notifications)
+
+## Pages
+| URL | Description | Who |
+|-----|-------------|-----|
+| `/` | Home page | Public |
+| `/apply` | Tenant registration (3-step flow) | Tenant |
+| `/decision?application_id=` | Loan decision result | Tenant |
+| `/tenant` | Application status + repayment dashboard | Tenant |
+| `/landlord` | Look up individual guarantee by reference | Landlord |
+| `/landlord/tenants` | Company login + all tenants overview | Landlord |
+| `/admin` | Full loan portfolio + overdue alerts | Internal |
 
 ## Credit scoring model
-Three dimensions from the business plan:
-- Ability to pay: affordability ratio = rent/income, debt-to-income ratio
-- Financial stability: cash flow variance, liquidity buffer = savings/monthly expenses
-- Financial discipline: payment consistency, balance stability, overdraft frequency
+Four dimensions:
+- **Ability to pay (40%)**: affordability ratio = rent/income, debt-to-income ratio, employment bonus
+- **Financial stability (20%)**: cash flow variance, liquidity buffer = savings/monthly expenses, residency bonus
+- **Financial discipline (20%)**: payment consistency, balance stability, spending regularity
+- **Behavioral liquidity risk (20%)**: overdraft frequency, low-balance days, rejected transactions
+
+Score thresholds:
+- ≥ 80 → Approved at 8%
+- ≥ 65 → Approved at 10%
+- ≥ 60 → Approved at 12%
+- < 60 → Rejected
 
 ## Architecture constraints
 - Single deployable app
@@ -37,12 +57,25 @@ Three dimensions from the business plan:
 - Real AFM licensing (mention partnership model in comments)
 - Actual bank transfers (simulate with status updates)
 - B2B landlord subscription service (Phase 2)
+- Admin page authentication
+- Custom landlord ("Others") access to tenant portal
 
 ## Running the project
 ```bash
 pip install -r requirements.txt
+python3 seed.py          # populate demo data (safe to re-run — skips existing records)
 uvicorn main:app --reload
 ```
+
+## Demo accounts
+| Role | URL | Credentials |
+|------|-----|-------------|
+| Tenant | `/tenant` | `jan.devries@gmail.com` |
+| Holland2Stay | `/landlord/tenants` | password: `h2s-2024` |
+| Our Domain | `/landlord/tenants` | password: `od-2024` |
+| Vesteda | `/landlord/tenants` | password: `vest-2024` |
+| Greystar | `/landlord/tenants` | password: `grey-2024` |
+| Admin | `/admin` | no login required |
 
 ## Git workflow
 - Two collaborators: Jenny (frontend) and Ping (backend)

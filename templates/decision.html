@@ -59,6 +59,7 @@
     <p class="section-label">Rental property</p>
     <p id="decision-address" style="font-size:15px;font-weight:600;color:var(--text);"></p>
     <p id="decision-postal" style="font-size:13px;color:var(--muted);margin-top:2px;"></p>
+    <p id="decision-rent" style="font-size:13px;color:var(--muted);margin-top:6px;"></p>
   </div>
 
   <hr class="divider" />
@@ -181,6 +182,7 @@ async function loadDecision() {
       document.getElementById('section-property').classList.remove('hidden');
       document.getElementById('decision-address').textContent = data.rental_address;
       document.getElementById('decision-postal').textContent  = data.rental_postal_code || '';
+      document.getElementById('decision-rent').textContent    = data.monthly_rent ? 'Monthly rent: ' + fmtEur(data.monthly_rent) : '';
     }
 
     /* Stats */

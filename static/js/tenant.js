@@ -72,6 +72,7 @@ function showProfile(data) {
   if (hasAddress) {
     document.getElementById('profile-address').textContent = data.rental_address;
     document.getElementById('profile-postal').textContent  = data.rental_postal_code || '';
+    document.getElementById('profile-rent').textContent    = data.monthly_rent ? 'Monthly rent: ' + fmtEur(data.monthly_rent) : '';
   }
 
   /* Deposit stats */

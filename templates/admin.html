@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Admin — DepositEase{% endblock %}
+{% block content %}
+
+<section class="lookup-hero">
+  <h1>Admin dashboard</h1>
+  <p>Loan portfolio overview and overdue alerts.</p>
+</section>
+
+<main>
+
+<!-- Overdue alert banner -->
+<div id="overdue-banner" class="callout callout-warning hidden" style="margin-bottom:20px;">
+  <span class="icon">⚠️</span>
+  <span id="overdue-banner-text"></span>
+</div>
+
+<!-- Stats grid -->
+<div class="stat-grid" style="margin-bottom:24px;" id="stats-grid">
+  <div class="stat-item">
+    <div class="stat-label">Total applications</div>
+    <div class="stat-value" id="stat-total">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Approved</div>
+    <div class="stat-value" style="color:#059669;" id="stat-approved">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Rejected</div>
+    <div class="stat-value" style="color:#dc2626;" id="stat-rejected">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Pending / Draft</div>
+    <div class="stat-value" style="color:#d97706;" id="stat-pending">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Portfolio value</div>
+    <div class="stat-value highlight" id="stat-portfolio">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Avg credit score</div>
+    <div class="stat-value" id="stat-avg-score">—</div>
+  </div>
+</div>
+
+<!-- Filter tabs -->
+<div class="card" style="padding:0;overflow:hidden;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;">
+    <h2 style="font-size:16px;font-weight:700;color:var(--navy);margin:0;">All applications</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;" id="filter-tabs">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="approved">Approved</button>
+      <button class="filter-btn" data-filter="pending">Pending</button>
+      <button class="filter-btn" data-filter="rejected">Rejected</button>
+      <button class="filter-btn" data-filter="overdue" style="color:#dc2626;">Overdue ⚠️</button>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table id="loans-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:var(--surface);text-align:left;">
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Ref</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Tenant</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Status</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Deposit</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Score</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Rate</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Monthly</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Term</th>
+          <th style="padding:10px 16px;color:var(--muted);font-weight:600;">Applied</th>
+        </tr>
+      </thead>
+      <tbody id="loans-body">
+        <tr><td colspan="9" style="padding:32px;text-align:center;color:var(--muted);">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="empty-state" class="hidden" style="padding:40px;text-align:center;color:var(--muted);">
+    No applications match this filter.
+  </div>
+</div>
+
+</main>
+
+{% endblock %}
+{% block scripts %}
+<script>
+let allRows = [];
+let activeFilter = 'all';
+
+const STATUS_STYLE = {
+  approved: { label: 'Approved',  color: '#059669', bg: '#d1fae5' },
+  pending:  { label: 'Pending',   color: '#d97706', bg: '#fef3c7' },
+  draft:    { label: 'Draft',     color: '#6b7280', bg: '#f3f4f6' },
+  rejected: { label: 'Rejected',  color: '#dc2626', bg: '#fee2e2' },
+};
+
+function fmtEur(val) {
+  if (val == null) return '—';
+  return '€' + Number(val).toLocaleString('nl-NL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtRate(val) {
+  if (val == null) return '—';
+  return (val * 100).toFixed(0) + '%';
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('loans-body');
+  const empty = document.getElementById('empty-state');
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  tbody.innerHTML = rows.map(r => {
+    const st  = STATUS_STYLE[r.status] || STATUS_STYLE.draft;
+    const badge = `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;color:${st.color};background:${st.bg};">${st.label}</span>`;
+    const overdueMark = r.is_overdue ? ' <span title="Overdue" style="color:#dc2626;">⚠️</span>' : '';
+    const score = r.credit_score != null ? Math.round(r.credit_score) : '—';
+    const term  = r.repayment_months ? r.repayment_months + ' mo' : '—';
+
+    return `<tr style="border-top:1px solid var(--border);" class="loan-row" data-status="${r.status}" data-overdue="${r.is_overdue}">
+      <td style="padding:12px 16px;font-weight:600;color:var(--navy);white-space:nowrap;">${r.reference}${overdueMark}</td>
+      <td style="padding:12px 16px;">
+        <div style="font-weight:600;color:var(--text);">${r.tenant_name}</div>
+        <div style="font-size:11px;color:var(--muted);">${r.email}</div>
+      </td>
+      <td style="padding:12px 16px;">${badge}</td>
+      <td style="padding:12px 16px;font-weight:600;">${fmtEur(r.deposit_amount)}</td>
+      <td style="padding:12px 16px;">${score}</td>
+      <td style="padding:12px 16px;">${fmtRate(r.interest_rate)}</td>
+      <td style="padding:12px 16px;">${fmtEur(r.monthly_repayment)}</td>
+      <td style="padding:12px 16px;">${term}</td>
+      <td style="padding:12px 16px;color:var(--muted);white-space:nowrap;">${fmtDate(r.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function applyFilter(filter) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+
+  let filtered = allRows;
+  if (filter === 'approved') filtered = allRows.filter(r => r.status === 'approved' && !r.is_overdue);
+  else if (filter === 'pending') filtered = allRows.filter(r => r.status === 'pending' || r.status === 'draft');
+  else if (filter === 'rejected') filtered = allRows.filter(r => r.status === 'rejected');
+  else if (filter === 'overdue') filtered = allRows.filter(r => r.is_overdue);
+
+  renderTable(filtered);
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+async function loadOverview() {
+  try {
+    const res  = await fetch('/api/v1/admin/overview');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Failed to load.');
+
+    const s = data.stats;
+    document.getElementById('stat-total').textContent    = s.total;
+    document.getElementById('stat-approved').textContent = s.approved;
+    document.getElementById('stat-rejected').textContent = s.rejected;
+    document.getElementById('stat-pending').textContent  = s.pending;
+    document.getElementById('stat-portfolio').textContent = fmtEur(s.total_portfolio_value);
+    document.getElementById('stat-avg-score').textContent = s.avg_credit_score != null ? s.avg_credit_score : '—';
+
+    if (data.overdue_count > 0) {
+      const banner = document.getElementById('overdue-banner');
+      document.getElementById('overdue-banner-text').textContent =
+        `${data.overdue_count} loan${data.overdue_count > 1 ? 's' : ''} may be overdue — repayment period has ended.`;
+      banner.classList.remove('hidden');
+    }
+
+    allRows = data.applications;
+    applyFilter('all');
+  } catch (err) {
+    document.getElementById('loans-body').innerHTML =
+      `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--orange);">${err.message}</td></tr>`;
+  }
+}
+
+loadOverview();
+</script>
+
+<style>
+.filter-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+.filter-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+</style>
+{% endblock %}

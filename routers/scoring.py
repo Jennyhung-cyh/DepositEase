@@ -193,11 +193,11 @@ def calculate_score(
     if not tenant.bank_connected:
         raise HTTPException(status_code=400, detail="Bank account not connected.")
 
-    if not (1_000 <= amount_requested <= 4_000):
-        raise HTTPException(status_code=422, detail="Loan amount must be between €1,000 and €4,000.")
+    if amount_requested <= 0:
+        raise HTTPException(status_code=422, detail="Loan amount must be greater than €0.")
 
-    if repayment_months not in (6, 12):
-        raise HTTPException(status_code=422, detail="Repayment term must be 6 or 12 months.")
+    if repayment_months <= 0 or repayment_months > 120:
+        raise HTTPException(status_code=422, detail="Repayment term must be between 1 and 120 months.")
 
     stmt = (
         db.query(SyntheticBankStatement)

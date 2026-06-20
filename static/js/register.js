@@ -348,76 +348,58 @@ document.getElementById('rental_postal_code').addEventListener('input', function
   }
 });
 
-/* ─── Repayment term options (dynamic) ─── */
-/* Candidate options in months — filtered to [min_months, 24] */
-const REPAYMENT_CANDIDATES = [6, 12, 18, 24];
-
-function updateRepaymentOptions() {
+/* ─── Repayment term display (auto-matched to contract) ─── */
+function updateRepaymentDisplay() {
   const termSpecified = document.querySelector('input[name="contract_term_specified"]:checked')?.value;
   document.getElementById('cond-term-months').classList.toggle('hidden', termSpecified !== 'yes');
 
-  let minMonths = 12;
+  let months = 12;
   if (termSpecified === 'yes') {
     const raw = parseInt(document.getElementById('contract_term_months').value, 10);
-    if (!isNaN(raw) && raw > 0) minMonths = raw;
+    if (!isNaN(raw) && raw > 0) months = raw;
   }
 
-  const options = REPAYMENT_CANDIDATES.filter(m => m >= minMonths && m <= 24);
-  if (options.length === 0) options.push(24);
-
-  const container = document.getElementById('repayment-options');
-  const currentSelected = document.querySelector('input[name="repayment_months"]:checked')?.value;
-  container.innerHTML = '';
-
-  const labels = { 6: '6 months', 12: '12 months (1 year)', 18: '18 months', 24: '24 months (2 years)' };
-  options.forEach(months => {
-    const checked = currentSelected == months ? 'checked' : '';
-    container.insertAdjacentHTML('beforeend',
-      `<input type="radio" name="repayment_months" id="rm-${months}" value="${months}" ${checked} />` +
-      `<label for="rm-${months}">${labels[months] || months + ' months'}</label>`
-    );
-  });
+  const termLabel = termSpecified === 'yes' ? `${months} months — matched to your contract` : '12 months (default — no fixed term)';
+  document.getElementById('repayment-term-display').textContent = `Repayment term: ${termLabel}.`;
 }
 
 document.querySelectorAll('input[name="contract_term_specified"]').forEach(r => {
-  r.addEventListener('change', updateRepaymentOptions);
+  r.addEventListener('change', updateRepaymentDisplay);
 });
 
-document.getElementById('contract_term_months').addEventListener('input', updateRepaymentOptions);
+document.getElementById('contract_term_months').addEventListener('input', updateRepaymentDisplay);
 
 /* ─── STEP 3 SUBMIT ─── */
 document.getElementById('form-rental').addEventListener('submit', async e => {
   e.preventDefault();
   clearErrors();
 
-  const address    = document.getElementById('rental_address').value.trim();
-  const postal     = document.getElementById('rental_postal_code').value.trim();
-  const deposit    = parseFloat(document.getElementById('deposit_amount').value);
-  const contractFile = document.getElementById('file-contract').files[0];
+  const address       = document.getElementById('rental_address').value.trim();
+  const postal        = document.getElementById('rental_postal_code').value.trim();
+  const monthlyRent   = parseFloat(document.getElementById('monthly_rent').value);
+  const deposit       = parseFloat(document.getElementById('deposit_amount').value);
+  const contractFile  = document.getElementById('file-contract').files[0];
   const termSpecified = document.querySelector('input[name="contract_term_specified"]:checked')?.value;
   const termMonthsRaw = document.getElementById('contract_term_months').value;
-  const repayment  = document.querySelector('input[name="repayment_months"]:checked')?.value;
+
+  // Repayment months = contract term (or 12 if no fixed term stated)
+  let repaymentMonths = 12;
+  if (termSpecified === 'yes') {
+    const tm = parseInt(termMonthsRaw, 10);
+    if (!isNaN(tm) && tm > 0) repaymentMonths = tm;
+  }
 
   let valid = true;
 
   if (!address) { showError('err-address'); valid = false; }
-
-  if (!/^\d{4}\s?[A-Za-z]{2}$/.test(postal)) {
-    showError('err-postal'); valid = false;
-  }
-
+  if (!/^\d{4}\s?[A-Za-z]{2}$/.test(postal)) { showError('err-postal'); valid = false; }
   if (!contractFile) { showError('err-contract'); valid = false; }
-
   if (termSpecified === 'yes') {
     const tm = parseInt(termMonthsRaw, 10);
     if (!tm || tm < 1) { showError('err-term-months'); valid = false; }
   }
-
-  if (isNaN(deposit) || deposit <= 0 || deposit > 4000) {
-    showError('err-deposit'); valid = false;
-  }
-
-  if (!repayment) { showError('err-repayment'); valid = false; }
+  if (isNaN(monthlyRent) || monthlyRent <= 0) { showError('err-monthly-rent'); valid = false; }
+  if (isNaN(deposit) || deposit <= 0) { showError('err-deposit'); valid = false; }
 
   if (!valid) return;
 
@@ -440,21 +422,30 @@ document.getElementById('form-rental').addEventListener('submit', async e => {
     fd.append('rental_address', address);
     fd.append('rental_postal_code', postal);
     fd.append('deposit_amount', deposit);
-    fd.append('repayment_months', repayment);
-    if (termSpecified === 'yes' && termMonthsRaw) {
-      fd.append('contract_term_months', parseInt(termMonthsRaw, 10));
-    }
+    fd.append('repayment_months', repaymentMonths);
+    if (termSpecified === 'yes') fd.append('contract_term_months', repaymentMonths);
 
     const res = await fetch('/api/v1/register/rental', { method: 'POST', body: fd });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Submission failed.');
 
-    toast('Application submitted! Running credit check...', 'success');
-    goToStep(4);
+    /* Run credit scoring */
+    const fdScore = new FormData();
+    fdScore.append('tenant_id', tenantId);
+    fdScore.append('application_id', applicationId);
+    fdScore.append('monthly_rent', monthlyRent);
+    fdScore.append('amount_requested', deposit);
+    fdScore.append('repayment_months', repaymentMonths);
 
+    const scoreRes = await fetch('/api/v1/score/calculate', { method: 'POST', body: fdScore });
+    const scoreData = await scoreRes.json();
+    if (!scoreRes.ok) throw new Error(scoreData.detail || 'Credit scoring failed.');
+
+    toast('Credit check complete!', 'success');
+    goToStep(4);
     setTimeout(() => {
       window.location.href = `/decision?application_id=${applicationId}`;
-    }, 1800);
+    }, 1500);
   } catch (err) {
     toast(err.message, 'error');
   } finally {
@@ -536,7 +527,7 @@ document.getElementById('form-income').addEventListener('submit', async e => {
     if (!res.ok) throw new Error(data.detail || 'Submission failed.');
 
     toast('Income verified — step 3 of 4', 'success');
-    updateRepaymentOptions();
+    updateRepaymentDisplay();
     goToStep(3);
   } catch (err) {
     toast(err.message, 'error');

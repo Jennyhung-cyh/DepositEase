@@ -274,9 +274,6 @@ def submit_income(
     return {"status": "pending", "application_id": app.id, "next": "/rental"}
 
 
-VALID_REPAYMENT_MONTHS = {6, 12, 18, 24}
-
-
 @router.post("/rental")
 def submit_rental(
     tenant_id: int = Form(...),
@@ -297,11 +294,11 @@ def submit_rental(
     if not app or app.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="Application not found.")
 
-    if not (0 < deposit_amount <= 4000):
-        raise HTTPException(status_code=422, detail="Deposit amount must be between €1 and €4,000.")
+    if deposit_amount <= 0:
+        raise HTTPException(status_code=422, detail="Deposit amount must be greater than €0.")
 
-    if repayment_months not in VALID_REPAYMENT_MONTHS:
-        raise HTTPException(status_code=422, detail="Repayment term must be 6, 12, 18, or 24 months.")
+    if repayment_months <= 0 or repayment_months > 120:
+        raise HTTPException(status_code=422, detail="Repayment term must be between 1 and 120 months.")
 
     min_months = contract_term_months if contract_term_months else 12
     if repayment_months < min_months:

@@ -5,7 +5,7 @@
 <!-- Hero -->
 <section class="hero">
   <h1>Apply for your rental deposit</h1>
-  <p>Get up to €4,000 — instant AI credit decision, no guarantor needed.</p>
+  <p>Instant AI credit decision, no guarantor needed.</p>
 </section>
 
 <!-- Step progress -->
@@ -357,6 +357,17 @@
       <div class="field-error" id="err-postal">Enter a valid Dutch postal code (e.g. 1234 AB).</div>
     </div>
 
+    <!-- Monthly rent -->
+    <div class="form-group">
+      <label for="monthly_rent">Monthly rent <span style="color:var(--orange)">*</span></label>
+      <div class="amount-group">
+        <span class="currency">€</span>
+        <input type="number" id="monthly_rent" name="monthly_rent"
+               min="1" max="9999" step="1" placeholder="1200" inputmode="numeric" />
+      </div>
+      <div class="field-error" id="err-monthly-rent">Please enter your monthly rent amount.</div>
+    </div>
+
     <hr class="divider" />
 
     <!-- Contract upload -->
@@ -402,24 +413,20 @@
       <div class="amount-group">
         <span class="currency">€</span>
         <input type="number" id="deposit_amount" name="deposit_amount"
-               min="1" max="4000" step="1" placeholder="2000" inputmode="numeric" />
+               min="1" step="1" placeholder="2000" inputmode="numeric" />
       </div>
-      <p class="amount-hint">Maximum deposit amount is €4,000.</p>
-      <div class="field-error" id="err-deposit">Please enter a valid deposit amount (max €4,000).</div>
+      <div class="field-error" id="err-deposit">Please enter a valid deposit amount.</div>
     </div>
 
     <hr class="divider" />
 
-    <!-- Repayment term -->
+    <!-- Repayment term (auto-matched to contract) -->
     <div class="form-group">
-      <label>Preferred repayment term <span style="color:var(--orange)">*</span></label>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
-        Select how long you'd like to repay the deposit loan.
-      </p>
-      <div class="option-list" id="repayment-options">
-        <!-- populated dynamically based on contract term -->
+      <label>Repayment term</label>
+      <div class="callout callout-info">
+        <span class="icon">💡</span>
+        <span id="repayment-term-display">Your repayment term will match your contract duration. Enter the contract term above to confirm.</span>
       </div>
-      <div class="field-error" id="err-repayment">Please select a repayment term.</div>
     </div>
 
     <div class="btn-row">

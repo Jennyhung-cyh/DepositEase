@@ -41,6 +41,30 @@ def get_tenant_profile(email: str = Query(...), db: Session = Depends(get_db)):
     }
 
 
+@router.get("/decision/{application_id}")
+def get_decision(application_id: int, db: Session = Depends(get_db)):
+    app = db.get(Application, application_id)
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found.")
+
+    tenant = db.get(Tenant, app.tenant_id)
+
+    return {
+        "reference": f"DE-{app.id:06d}",
+        "status": app.status,
+        "full_name": tenant.full_name if tenant else "Applicant",
+        "deposit_amount": app.amount_requested,
+        "credit_score": app.credit_score,
+        "interest_rate": app.interest_rate,
+        "monthly_repayment": app.monthly_repayment,
+        "repayment_months": app.repayment_months,
+        "decision_reason": app.decision_reason,
+        "rental_address": app.rental_address,
+        "rental_postal_code": app.rental_postal_code,
+        "created_at": app.created_at.isoformat() if app.created_at else None,
+    }
+
+
 @router.get("/landlord/{application_id}")
 def get_landlord_profile(application_id: int, db: Session = Depends(get_db)):
     app = db.get(Application, application_id)

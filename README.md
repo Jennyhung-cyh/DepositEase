@@ -221,3 +221,19 @@ Full interactive docs available at **http://localhost:8000/docs**
 | Ping | Backend (FastAPI, Python, database) |
 
 RSM Fintech — 2026
+
+---
+
+## License
+
+This project was developed as an academic MVP for the FinTech: Business Models and Application course at Rotterdam School of Management (RSM), Erasmus University, 2025–2026.
+
+All rights reserved. This code is intended for educational and demonstration purposes only. It may not be used, copied, or distributed for commercial purposes without permission.
+
+> **Disclaimer:** DepositEase is a simulated product. It does not hold an AFM licence, does not process real payments, and does not connect to any real banking infrastructure.
+
+---
+
+## Topics
+
+`fintech` `rental-deposit` `credit-scoring` `fastapi` `python` `sqlite` `synthetic-data` `mvp` `netherlands`

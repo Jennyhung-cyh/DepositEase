@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Page not found — DepositEase{% endblock %}
+{% block content %}
+
+<section class="lookup-hero">
+  <h1>Page not found</h1>
+  <p>The page you're looking for doesn't exist or has been moved.</p>
+</section>
+
+<main>
+<div class="card" style="text-align:center;padding:48px 24px;">
+  <p style="font-size:64px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:8px;">404</p>
+  <p style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Page not found</p>
+  <p style="font-size:14px;color:var(--muted);margin-bottom:32px;">
+    The URL you entered doesn't exist. Check the address and try again, or go back to the home page.
+  </p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="/" class="btn btn-primary" style="flex:unset;padding:12px 28px;text-decoration:none;">Back to home</a>
+    <a href="/apply" class="btn btn-secondary" style="flex:unset;padding:12px 28px;text-decoration:none;">Apply now</a>
+  </div>
+</div>
+</main>
+
+{% endblock %}

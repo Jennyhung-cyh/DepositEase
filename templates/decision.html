@@ -14,6 +14,16 @@
   <p style="color:var(--muted);">Loading your result…</p>
 </div>
 
+<div id="error-card" class="card hidden" style="text-align:center;padding:48px 24px;">
+  <p style="font-size:48px;margin-bottom:12px;">🔍</p>
+  <p style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:8px;">Application not found</p>
+  <p id="error-message" style="font-size:14px;color:var(--muted);margin-bottom:28px;"></p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="/apply" class="btn btn-primary" style="flex:unset;padding:12px 28px;text-decoration:none;">Apply now</a>
+    <a href="/tenant" class="btn btn-secondary" style="flex:unset;padding:12px 28px;text-decoration:none;">View my application</a>
+  </div>
+</div>
+
 <section id="decision-card" class="card hidden">
 
   <!-- Status banner -->
@@ -136,8 +146,7 @@ async function loadDecision() {
   const params = new URLSearchParams(window.location.search);
   const appId  = params.get('application_id');
   if (!appId) {
-    document.getElementById('loading-card').innerHTML =
-      '<p style="color:var(--orange);text-align:center;">No application ID found. <a href="/apply">Apply now</a>.</p>';
+    showError('No application ID provided. Please apply first.');
     return;
   }
 
@@ -194,9 +203,14 @@ async function loadDecision() {
       data.created_at ? 'Applied on ' + fmtDate(data.created_at) : '';
 
   } catch (err) {
-    document.getElementById('loading-card').innerHTML =
-      `<p style="color:var(--orange);text-align:center;">${err.message}</p>`;
+    showError(err.message);
   }
+}
+
+function showError(msg) {
+  document.getElementById('loading-card').classList.add('hidden');
+  document.getElementById('error-message').textContent = msg;
+  document.getElementById('error-card').classList.remove('hidden');
 }
 
 loadDecision();

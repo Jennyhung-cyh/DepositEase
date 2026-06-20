@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from database import Base, engine
 import models  # noqa: F401 — registers all ORM models before create_all
@@ -54,6 +55,15 @@ def decision_view(request: Request):
 @app.get("/admin", response_class=HTMLResponse)
 def admin_view(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request, "page": "admin"})
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+    return templates.TemplateResponse(
+        "404.html", {"request": request, "page": ""}, status_code=exc.status_code
+    )
 
 
 @app.get("/health")

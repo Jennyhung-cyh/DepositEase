@@ -208,6 +208,7 @@ Full interactive docs available at **http://localhost:8000/docs**
 - **GDPR** — BSN numbers and uploaded documents are flagged in code and never included in API responses or logs
 - **AFM licensing** — real money lending requires AFM authorisation; this MVP simulates the product under a partnership model assumption
 - **Landlord passwords** — currently hardcoded for MVP; should be moved to environment variables before production deployment
+- **404 handling** — unknown URLs return a styled HTML error page; API routes (`/api/v1/...`) still return JSON errors as expected
 
 ---
 

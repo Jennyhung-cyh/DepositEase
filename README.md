@@ -112,6 +112,8 @@ uvicorn main:app --reload
 
 Then open **http://localhost:8000** in your browser.
 
+> **Note:** The server must be running locally before opening the browser. If you see `ERR_CONNECTION_REFUSED`, make sure `uvicorn main:app --reload` is still running in your terminal.
+
 > Re-running `seed.py` is safe — it skips records that already exist.
 
 ---

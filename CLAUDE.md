@@ -78,6 +78,6 @@ uvicorn main:app --reload
 | Admin | `/admin` | no login required |
 
 ## Git workflow
-- Two collaborators: Jenny (frontend) and Ping (backend)
+- Two collaborators: Ping (frontend) and Jenny (backend)
 - Commit after each feature with clear messages
 - Never push directly to main without testing locally

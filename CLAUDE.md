@@ -5,6 +5,20 @@ For project overview, features, pages, API reference, and demo accounts — read
 
 ---
 
+## Key architectural decisions
+
+These decisions were made by the team and should not be reversed without explicit instruction.
+
+- **SQLite over PostgreSQL** — MVP runs locally for a single demo session; no concurrent users, no persistent cloud DB needed. Switching to Postgres adds deployment complexity with no benefit at this stage.
+- **Synthetic bank data over real PSD2 integration** — connecting to real Open Banking APIs requires AFM licensing and OAuth flows that are out of scope for an academic MVP. The synthetic generator produces realistic 6-month statement data that is sufficient to demonstrate the scoring logic.
+- **Vanilla JS over React/Vue** — the frontend is simple enough that a framework would add build tooling overhead with no UX benefit. Vanilla JS keeps the stack readable and deployable without a build step.
+- **FastAPI over Django/Flask** — FastAPI gives automatic `/docs` (OpenAPI), async support, and Pydantic validation with minimal boilerplate. Django was rejected as over-engineered for a single-module MVP.
+- **Single deployable app** — frontend templates are served by FastAPI directly (Jinja2), avoiding a separate frontend server and keeping deployment to a single `uvicorn` command.
+- **Hardcoded landlord passwords** — acceptable for MVP demo purposes only; the code includes a comment flagging this for production. Do not refactor to a DB-backed auth system without instruction.
+- **No admin authentication** — intentional MVP scoping decision; adding auth here was explicitly rejected to keep the demo frictionless for internal reviewers.
+
+---
+
 ## Before making any change
 
 1. Read the relevant router in `routers/` before editing backend logic.

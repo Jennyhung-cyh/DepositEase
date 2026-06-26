@@ -220,6 +220,27 @@ This data feeds directly into the credit scoring engine without any transformati
 
 ---
 
+## Business plan implementation status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Tenant registration (3-step flow) | ✅ Implemented | Identity, bank connection, rental details |
+| AI credit scoring (4 dimensions) | ✅ Implemented | Ability to pay, stability, discipline, liquidity risk |
+| Loan decision with interest rate (8–12%) | ✅ Implemented | Based on credit score thresholds |
+| Repayment dashboard | ✅ Implemented | Monthly schedule, remaining balance |
+| Landlord individual lookup | ✅ Implemented | By reference number (DE-XXXXXX) |
+| Landlord company portal | ✅ Implemented | Holland2Stay, Our Domain, Vesteda, Greystar |
+| Admin portfolio overview | ✅ Implemented | Overdue alerts, status filters |
+| Open banking / PSD2 integration | ❌ Not implemented | Replaced by synthetic bank data generator |
+| Real deposit payout to landlord | ❌ Not implemented | Simulated with status notification |
+| Registration fee (€20) | ❌ Not implemented | No payment processing in MVP |
+| AFM licensing / regulatory compliance | ❌ Not implemented | Partnership model assumed |
+| B2B landlord subscription service | ❌ Not implemented | Phase 2 |
+| RoomPlaza partnership | ❌ Not implemented | Only housing platforms with existing portals |
+| Capital partnership with banks | ❌ Not implemented | Simulated financing flow |
+
+---
+
 ## Notes
 
 - **No real banking data** — all bank statements are synthetically generated; no PSD2 or Open Banking calls are made

@@ -204,6 +204,22 @@ Full interactive docs available at **http://localhost:8000/docs**
 
 ---
 
+## Synthetic data generation
+
+Since no real PSD2 or Open Banking integration is in scope for this MVP, bank statement data is generated programmatically in `routers/registration.py` when a tenant clicks "Connect Bank".
+
+The generator produces 6 months of realistic financial data:
+
+- **Income & expenses** — monthly income is drawn from a uniform distribution (€1,800–€4,500); expenses are a randomised proportion of income (45–80%)
+- **Savings & debt** — savings balance (€500–€8,000) and monthly debt payments (0–25% of income) are randomised independently
+- **Payment behaviour** — late payments and rejected transactions are weighted toward zero to reflect a realistic population skew
+- **Overdraft & low-balance stress** — overdraft days and low-balance days are sampled from weighted distributions that make stress events rare but possible
+- **Monthly detail** — each of the 6 months gets a per-month variation (±8% income, ±12% expenses) plus a breakdown of discretionary spending (restaurants, luxury, irregular transfers, cash withdrawals) and daily balance statistics
+
+This data feeds directly into the credit scoring engine without any transformation — what the generator produces is what the model scores.
+
+---
+
 ## Notes
 
 - **No real banking data** — all bank statements are synthetically generated; no PSD2 or Open Banking calls are made

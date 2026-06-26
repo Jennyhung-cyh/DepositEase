@@ -167,6 +167,16 @@ When modifying any feature, verify all items that apply:
 
 ---
 
+## Prompt engineering guidelines
+
+- Do not modify backend logic (routers/, scoring engine, models) when the task is frontend-only
+- Do not modify frontend templates when the task is backend-only
+- When adding a new page, always update the Pages table in this file and in README.md
+- Do not add new demo accounts or seed data without being asked
+- Do not add authentication to the admin page — it is intentionally open for MVP
+- Keep all HTML, CSS, and JS inside the existing templates/ and static/ structure; do not introduce new frameworks
+- When in doubt about scope, ask before implementing
+
 ## Git workflow
 
 - Two collaborators: **Ping** (backend — FastAPI, Python, database) and **Jenny** (frontend — HTML, CSS, JS).
